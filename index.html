@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atelier d'etude - Guillaume</title>
+    <style>
+        :root {
+            --ink: #172126;
+            --muted: #63717a;
+            --paper: #fbfaf6;
+            --panel: #ffffff;
+            --line: #dfe7e3;
+            --mint: #3eb489;
+            --mint-dark: #227a63;
+            --blue: #2f80ed;
+            --yellow: #f4c95d;
+            --coral: #ff6b5f;
+            --violet: #7c5cff;
+            --shadow: 0 16px 42px rgba(42, 54, 59, 0.12);
+            --radius: 8px;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            color: var(--ink);
+            background:
+                linear-gradient(90deg, rgba(47, 128, 237, 0.06) 1px, transparent 1px),
+                linear-gradient(rgba(62, 180, 137, 0.07) 1px, transparent 1px),
+                #eef5f0;
+            background-size: 28px 28px;
+        }
+
+        button, input, textarea, select {
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            cursor: pointer;
+            min-height: 42px;
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.55;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: var(--panel);
+            color: var(--ink);
+            padding: 11px 12px;
+            outline: 0;
+        }
+
+        textarea { resize: vertical; min-height: 130px; line-height: 1.5; }
+        input:focus, textarea:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47,128,237,0.13); }
+
+        .shell {
+            width: min(1180px, calc(100% - 28px));
+            margin: 0 auto;
+            padding: 22px 0 34px;
+        }
+
+        .topbar {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 18px;
+            align-items: center;
+            padding: 12px 0 18px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .logo {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            background: conic-gradient(from 210deg, var(--mint), var(--yellow), var(--coral), var(--blue), var(--mint));
+            display: grid;
+            place-items: center;
+            color: white;
+            font-weight: 900;
+            box-shadow: var(--shadow);
+        }
+
+        h1, h2, h3, p { margin-top: 0; }
+        h1 { margin-bottom: 2px; font-size: clamp(26px, 4vw, 42px); letter-spacing: 0; }
+        h2 { margin-bottom: 14px; font-size: 24px; }
+        h3 { margin-bottom: 8px; font-size: 16px; }
+        .subtle { color: var(--muted); margin-bottom: 0; line-height: 1.45; }
+
+        .streak {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            white-space: nowrap;
+            font-weight: 800;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 238px minmax(0, 1fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 12px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .tab {
+            display: grid;
+            grid-template-columns: 28px 1fr;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            text-align: left;
+            background: rgba(255,255,255,0.72);
+            color: var(--ink);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            font-weight: 800;
+        }
+
+        .tab span:first-child {
+            display: grid;
+            place-items: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            background: #edf4f8;
+        }
+
+        .tab.active {
+            background: var(--ink);
+            color: white;
+            border-color: var(--ink);
+        }
+
+        .tab.active span:first-child { background: rgba(255,255,255,0.16); }
+
+        .main {
+            display: grid;
+            gap: 18px;
+        }
+
+        .section { display: none; }
+        .section.active { display: grid; gap: 18px; animation: rise 0.22s ease; }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(230px, 0.8fr);
+            gap: 18px;
+            align-items: stretch;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+        }
+
+        .hero-actions, .row, .button-row, .chips {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .hero-actions { margin-top: 18px; }
+
+        .desk-scene {
+            min-height: 210px;
+            border-radius: var(--radius);
+            background:
+                linear-gradient(145deg, rgba(62,180,137,0.16), rgba(47,128,237,0.12)),
+                #f7fbff;
+            border: 1px solid #d8e8ee;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .book {
+            position: absolute;
+            left: 30px;
+            bottom: 34px;
+            width: 150px;
+            height: 86px;
+            background: #ffffff;
+            border: 3px solid #17313b;
+            border-radius: 8px;
+            transform: rotate(-6deg);
+        }
+
+        .book::before {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: -3px;
+            bottom: -3px;
+            width: 3px;
+            background: #17313b;
+        }
+
+        .book::after {
+            content: "";
+            position: absolute;
+            left: 18px;
+            right: 18px;
+            top: 22px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--blue), transparent 78%);
+            box-shadow: 0 16px 0 rgba(62,180,137,0.55);
+        }
+
+        .pencil {
+            position: absolute;
+            right: 32px;
+            bottom: 62px;
+            width: 130px;
+            height: 16px;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #17313b 0 12px, var(--yellow) 12px 104px, var(--coral) 104px);
+            transform: rotate(24deg);
+        }
+
+        .planet {
+            position: absolute;
+            top: 24px;
+            right: 42px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 28% 22%, #ffffff, var(--mint) 34%, var(--blue));
+            animation: float 4s ease-in-out infinite;
+        }
+
+        .planet::after {
+            content: "";
+            position: absolute;
+            left: -16px;
+            top: 30px;
+            width: 104px;
+            height: 14px;
+            border: 4px solid rgba(23,33,38,0.22);
+            border-left-color: transparent;
+            border-right-color: transparent;
+            border-radius: 50%;
+            transform: rotate(-14deg);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-9px); }
+        }
+
+        .grid-2, .grid-3 {
+            display: grid;
+            gap: 14px;
+        }
+
+        .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+        .panel, .card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 18px;
+        }
+
+        .card { box-shadow: none; }
+
+        .metric {
+            display: grid;
+            gap: 3px;
+            min-height: 104px;
+            align-content: center;
+        }
+
+        .metric strong {
+            font-size: 30px;
+            color: var(--mint-dark);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .metric span { color: var(--muted); font-weight: 700; font-size: 13px; }
+
+        .primary, .secondary, .danger, .ghost {
+            width: auto;
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            font-weight: 900;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .primary { background: var(--mint); color: white; }
+        .secondary { background: var(--blue); color: white; }
+        .danger { background: var(--coral); color: white; }
+        .ghost { background: #eef3f1; color: var(--ink); border: 1px solid var(--line); }
+        .primary:hover, .secondary:hover, .danger:hover, .ghost:hover { transform: translateY(-1px); }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 7px 10px;
+            background: #eef3f1;
+            border: 1px solid var(--line);
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--muted);
+        }
+
+        .tasks {
+            display: grid;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .task {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 10px;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            background: #fbfdfc;
+        }
+
+        .task.done .task-title { text-decoration: line-through; color: var(--muted); }
+        .task-title { font-weight: 800; }
+        .task-meta { font-size: 12px; color: var(--muted); }
+        .check { width: 20px; height: 20px; accent-color: var(--mint); }
+
+        .timer {
+            text-align: center;
+            font-size: clamp(56px, 12vw, 112px);
+            font-weight: 950;
+            line-height: 1;
+            letter-spacing: 0;
+            color: var(--ink);
+            font-variant-numeric: tabular-nums;
+            margin: 12px 0;
+        }
+
+        .timer-mode {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .mode-btn {
+            border-radius: var(--radius);
+            padding: 10px;
+            background: #eef3f1;
+            color: var(--ink);
+            font-weight: 900;
+            border: 1px solid var(--line);
+        }
+
+        .mode-btn.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+        .progress-track {
+            height: 12px;
+            background: #e7eeeb;
+            border-radius: 999px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--mint), var(--blue));
+            transition: width 0.25s ease;
+        }
+
+        .flashcard {
+            min-height: 230px;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            padding: 24px;
+            border-radius: var(--radius);
+            background:
+                linear-gradient(135deg, rgba(47,128,237,0.14), rgba(244,201,93,0.22)),
+                #ffffff;
+            border: 2px solid #cfdfde;
+            font-size: clamp(22px, 4vw, 34px);
+            font-weight: 950;
+            cursor: pointer;
+            user-select: none;
+            word-break: break-word;
+        }
+
+        .flashcard.answer {
+            background:
+                linear-gradient(135deg, rgba(62,180,137,0.18), rgba(124,92,255,0.12)),
+                #ffffff;
+            border-color: var(--mint);
+        }
+
+        .list {
+            display: grid;
+            gap: 8px;
+            max-height: 320px;
+            overflow: auto;
+            padding-right: 2px;
+        }
+
+        .item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: center;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 10px;
+            background: #fbfdfc;
+        }
+
+        .item small { display: block; color: var(--muted); margin-top: 3px; }
+
+        .quiz-answer {
+            width: 100%;
+            text-align: left;
+            border-radius: var(--radius);
+            padding: 13px;
+            background: #f5f8f7;
+            border: 1px solid var(--line);
+            color: var(--ink);
+            font-weight: 800;
+        }
+
+        .quiz-answer.correct { background: rgba(62,180,137,0.16); border-color: var(--mint); }
+        .quiz-answer.wrong { background: rgba(255,107,95,0.14); border-color: var(--coral); }
+
+        .note-tools {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .coach {
+            border-left: 5px solid var(--yellow);
+            background: #fffaf0;
+        }
+
+        .wheel {
+            min-height: 190px;
+            border-radius: 50%;
+            aspect-ratio: 1;
+            width: min(260px, 100%);
+            margin: 10px auto;
+            background: conic-gradient(var(--mint) 0 60deg, var(--yellow) 60deg 120deg, var(--blue) 120deg 180deg, var(--coral) 180deg 240deg, var(--violet) 240deg 300deg, #6ec6ca 300deg 360deg);
+            border: 8px solid #ffffff;
+            box-shadow: 0 16px 36px rgba(23,33,38,0.16);
+            position: relative;
+            transition: transform 2.4s cubic-bezier(.13,.86,.25,1);
+        }
+
+        .wheel::after {
+            content: "";
+            position: absolute;
+            inset: 38%;
+            border-radius: 50%;
+            background: white;
+            border: 1px solid var(--line);
+        }
+
+        .pointer {
+            width: 0;
+            height: 0;
+            border-left: 16px solid transparent;
+            border-right: 16px solid transparent;
+            border-top: 30px solid var(--ink);
+            margin: 0 auto -12px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 22px;
+            transform: translate(-50%, 80px);
+            background: var(--ink);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 999px;
+            box-shadow: var(--shadow);
+            opacity: 0;
+            transition: 0.25s ease;
+            z-index: 10;
+            max-width: min(520px, calc(100% - 24px));
+            text-align: center;
+            font-weight: 800;
+        }
+
+        .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+        .confetti {
+            position: fixed;
+            width: 9px;
+            height: 14px;
+            top: -20px;
+            border-radius: 2px;
+            animation: fall 1.2s linear forwards;
+            z-index: 20;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(105vh) rotate(680deg); opacity: 0.8; }
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            border: 0;
+        }
+
+        @media (max-width: 860px) {
+            .topbar, .layout, .hero, .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .sidebar {
+                position: static;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .tab { grid-template-columns: 24px 1fr; padding: 9px; }
+            .tab span:first-child { width: 24px; height: 24px; }
+            .timer-mode { grid-template-columns: 1fr; }
+            .note-tools { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 520px) {
+            .shell { width: min(100% - 18px, 1180px); padding-top: 12px; }
+            .sidebar { grid-template-columns: 1fr; }
+            .panel, .hero { padding: 14px; }
+            .button-row button, .hero-actions button { flex: 1 1 150px; }
+            .streak { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <header class="topbar">
+            <div class="brand">
+                <div class="logo" aria-hidden="true">G</div>
+                <div>
+                    <h1>Atelier d'etude</h1>
+                    <p class="subtle">Un espace clair pour apprendre, reviser, rester concentre et garder un peu de fun.</p>
+                </div>
+            </div>
+            <div class="streak" title="Serie de jours avec au moins une action">
+                <span aria-hidden="true">🔥</span>
+                <span><strong id="streak">0</strong> jour(s) de suite</span>
+            </div>
+        </header>
+
+        <div class="layout">
+            <nav class="sidebar" aria-label="Navigation principale">
+                <button class="tab active" data-view="dashboard"><span>🏠</span><span>Accueil</span></button>
+                <button class="tab" data-view="plan"><span>✅</span><span>Plan du jour</span></button>
+                <button class="tab" data-view="focus"><span>⏱️</span><span>Focus</span></button>
+                <button class="tab" data-view="cards"><span>🃏</span><span>Flashcards</span></button>
+                <button class="tab" data-view="quiz"><span>🎯</span><span>Quiz</span></button>
+                <button class="tab" data-view="notes"><span>📝</span><span>Notes</span></button>
+                <button class="tab" data-view="fun"><span>🎲</span><span>Fun</span></button>
+            </nav>
+
+            <main class="main">
+                <section class="section active" id="dashboard">
+                    <div class="hero">
+                        <div>
+                            <span class="pill">Mode eleve actif</span>
+                            <h2 style="margin-top:12px;">Que veux-tu reussir aujourd'hui ?</h2>
+                            <p class="subtle">Choisis une petite mission, lance un focus, revise 5 cartes, puis coche tes progres. Le site sauvegarde tout dans ton navigateur.</p>
+                            <div class="hero-actions">
+                                <button class="primary" onclick="go('plan')">✅ Organiser ma seance</button>
+                                <button class="secondary" onclick="go('focus')">⏱️ Lancer un focus</button>
+                                <button class="ghost" onclick="coachBoost()">💬 Coach express</button>
+                            </div>
+                        </div>
+                        <div class="desk-scene" aria-hidden="true">
+                            <div class="planet"></div>
+                            <div class="book"></div>
+                            <div class="pencil"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid-3">
+                        <div class="panel metric">
+                            <strong id="m-focus">0</strong>
+                            <span>sessions terminees</span>
+                        </div>
+                        <div class="panel metric">
+                            <strong id="m-cards">0</strong>
+                            <span>cartes creees</span>
+                        </div>
+                        <div class="panel metric">
+                            <strong id="m-score">0%</strong>
+                            <span>reussite aux quiz</span>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="panel coach">
+                            <h3>Coach de poche</h3>
+                            <p id="coach-line" class="subtle">Commence par 10 minutes. Une petite victoire vaut mieux qu'un grand plan abandonne.</p>
+                        </div>
+                        <div class="panel">
+                            <h3>Prochaine action conseillee</h3>
+                            <p id="next-action" class="subtle">Ajoute 3 objectifs dans ton plan du jour.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section" id="plan">
+                    <div class="panel">
+                        <h2>Plan du jour</h2>
+                        <p class="subtle">Transforme "je dois travailler" en petites actions faciles a cocher.</p>
+                        <div class="row" style="margin-top:14px;">
+                            <input id="task-title" placeholder="Ex : apprendre 8 definitions de francais">
+                            <select id="task-subject" aria-label="Matiere">
+                                <option>Francais</option>
+                                <option>Maths</option>
+                                <option>Histoire</option>
+                                <option>Anglais</option>
+                                <option>Sciences</option>
+                                <option>Autre</option>
+                            </select>
+                            <button class="primary" onclick="addTask()">Ajouter</button>
+                        </div>
+                        <div class="tasks" id="tasks"></div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="panel">
+                            <h3>Routine rapide</h3>
+                            <div class="chips">
+                                <button class="ghost" onclick="addPresetTasks('exam')">🎓 Revision controle</button>
+                                <button class="ghost" onclick="addPresetTasks('oral')">🎤 Oral</button>
+                                <button class="ghost" onclick="addPresetTasks('homework')">📚 Devoirs</button>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>Barre de progression</h3>
+                            <div class="progress-track"><div class="progress-fill" id="task-progress"></div></div>
+                            <p class="subtle" id="task-progress-text" style="margin-top:10px;">0% du plan termine.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section" id="focus">
+                    <div class="panel">
+                        <h2>Focus timer</h2>
+                        <div class="timer-mode">
+                            <button class="mode-btn active" data-min="25" onclick="setTimerMode(this,25)">Travail 25</button>
+                            <button class="mode-btn" data-min="10" onclick="setTimerMode(this,10)">Sprint 10</button>
+                            <button class="mode-btn" data-min="5" onclick="setTimerMode(this,5)">Pause 5</button>
+                        </div>
+                        <div class="timer" id="timer">25:00</div>
+                        <div class="button-row" style="justify-content:center;">
+                            <button class="primary" id="timer-start" onclick="toggleTimer()">▶ Demarrer</button>
+                            <button class="ghost" onclick="resetTimer()">↻ Reset</button>
+                            <button class="danger" onclick="panicMode()">SOS motivation</button>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="panel">
+                            <h3>Regle anti-procrastination</h3>
+                            <p class="subtle">Pendant le focus : un seul onglet utile, telephone loin, objectif minuscule mais precis.</p>
+                        </div>
+                        <div class="panel">
+                            <h3>Son local</h3>
+                            <p class="subtle">Un petit son peut marquer la fin d'une session si le fichier audio est disponible.</p>
+                            <audio id="winSound" src="victoire.mp3" preload="auto"></audio>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section" id="cards">
+                    <div class="panel">
+                        <h2>Flashcards</h2>
+                        <div class="grid-2">
+                            <input id="card-q" placeholder="Question : Qu'est-ce qu'une metaphore ?">
+                            <input id="card-a" placeholder="Reponse : Une comparaison sans outil comparatif.">
+                        </div>
+                        <div class="button-row" style="margin-top:10px;">
+                            <button class="primary" onclick="addCard()">Ajouter la carte</button>
+                            <button class="ghost" onclick="addStarterCards()">Pack de depart</button>
+                            <button class="danger" onclick="clearCards()">Tout effacer</button>
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="panel">
+                            <h3>Revision</h3>
+                            <div class="flashcard" id="study-card" onclick="flipCard()">Ajoute une carte puis clique sur "Piocher".</div>
+                            <div class="button-row" style="margin-top:12px;">
+                                <button class="secondary" onclick="drawCard()">Piocher</button>
+                                <button class="primary" onclick="markCard(true)">Je savais</button>
+                                <button class="danger" onclick="markCard(false)">A revoir</button>
+                            </div>
+                        </div>
+                        <div class="panel">
+                            <h3>Mes cartes</h3>
+                            <div class="list" id="card-list"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section" id="quiz">
+                    <div class="panel">
+                        <h2>Quiz rapide</h2>
+                        <p class="subtle">Le quiz utilise tes flashcards. Parfait pour verifier si tu sais vraiment, sans tricher avec ton cerveau.</p>
+                        <div class="button-row" style="margin-top:12px;">
+                            <button class="primary" onclick="startQuiz()">Nouvelle question</button>
+                            <button class="ghost" onclick="makeQuizFromNotes()">Creer depuis mes notes</button>
+                        </div>
+                    </div>
+                    <div class="panel">
+                        <h3 id="quiz-q">Aucune question pour l'instant.</h3>
+                        <div class="list" id="quiz-answers"></div>
+                        <p class="subtle" id="quiz-feedback" style="margin-top:12px;"></p>
+                    </div>
+                </section>
+
+                <section class="section" id="notes">
+                    <div class="panel">
+                        <h2>Notes intelligentes</h2>
+                        <div class="note-tools">
+                            <input id="note-title" placeholder="Titre de la fiche">
+                            <button class="ghost" onclick="insertTemplate()">Plan de fiche</button>
+                            <button class="primary" onclick="saveNote()">Sauvegarder</button>
+                        </div>
+                        <textarea id="note-body" placeholder="Ecris ici : definitions, exemples, erreurs a eviter, questions a te poser..."></textarea>
+                        <p class="subtle" id="note-stats">0 mot</p>
+                    </div>
+                    <div class="grid-2">
+                        <div class="panel">
+                            <h3>Mes fiches</h3>
+                            <div class="list" id="note-list"></div>
+                        </div>
+                        <div class="panel">
+                            <h3>Methodes utiles</h3>
+                            <div class="chips">
+                                <button class="ghost" onclick="insertMethod('feynman')">Feynman</button>
+                                <button class="ghost" onclick="insertMethod('active')">Rappel actif</button>
+                                <button class="ghost" onclick="insertMethod('mistakes')">Erreurs</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section" id="fun">
+                    <div class="grid-2">
+                        <div class="panel">
+                            <h2>Roue des missions</h2>
+                            <p class="subtle">Quand tu ne sais pas par ou commencer, laisse la roue choisir une micro-mission.</p>
+                            <div class="pointer"></div>
+                            <div class="wheel" id="wheel"></div>
+                            <button class="primary" onclick="spinWheel()">Tourner</button>
+                            <p id="wheel-result" class="subtle" style="font-weight:800;text-align:center;"></p>
+                        </div>
+                        <div class="panel">
+                            <h2>Defi cerveau</h2>
+                            <p class="subtle">Mini-jeu : retiens le code, puis retape-le. Simple, un peu bete, tres efficace pour reveiller l'attention.</p>
+                            <div class="timer" style="font-size:44px;" id="memory-code">----</div>
+                            <input id="memory-input" placeholder="Retape le code ici">
+                            <div class="button-row">
+                                <button class="secondary" onclick="startMemory()">Nouveau code</button>
+                                <button class="primary" onclick="checkMemory()">Verifier</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        const STORE = "atelier_etude_v2";
+        const todayKey = () => new Date().toISOString().slice(0, 10);
+        const defaults = {
+            tasks: [],
+            cards: [],
+            notes: [],
+            stats: { focus: 0, right: 0, wrong: 0, actions: {}, lastDay: "", streak: 0 },
+            currentNoteId: null
+        };
+
+        let state = load();
+        let timerTotal = 25 * 60;
+        let timerLeft = timerTotal;
+        let timerTick = null;
+        let currentCard = null;
+        let cardShowingAnswer = false;
+        let quizCard = null;
+        let memoryAnswer = "";
+
+        function load() {
+            try {
+                return { ...defaults, ...(JSON.parse(localStorage.getItem(STORE)) || {}) };
+            } catch {
+                return structuredClone(defaults);
+            }
+        }
+
+        function save() {
+            localStorage.setItem(STORE, JSON.stringify(state));
+            renderAll();
+        }
+
+        function touchAction() {
+            const key = todayKey();
+            state.stats.actions[key] = (state.stats.actions[key] || 0) + 1;
+            if (state.stats.lastDay !== key) {
+                const yesterday = new Date();
+                yesterday.setDate(yesterday.getDate() - 1);
+                const yKey = yesterday.toISOString().slice(0, 10);
+                state.stats.streak = state.stats.lastDay === yKey ? state.stats.streak + 1 : 1;
+                state.stats.lastDay = key;
+            }
+        }
+
+        function toast(message) {
+            const t = document.getElementById("toast");
+            t.textContent = message;
+            t.classList.add("show");
+            clearTimeout(t.hideTimer);
+            t.hideTimer = setTimeout(() => t.classList.remove("show"), 2300);
+        }
+
+        function go(id) {
+            document.querySelectorAll(".tab").forEach(btn => btn.classList.toggle("active", btn.dataset.view === id));
+            document.querySelectorAll(".section").forEach(sec => sec.classList.toggle("active", sec.id === id));
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
+        document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => go(btn.dataset.view)));
+
+        function coachBoost() {
+            const lines = [
+                "Travaille 12 minutes. Si apres tu detestes encore, tu as le droit de renegocier.",
+                "Ton cerveau adore les petites cases cochees. Donne-lui une case facile.",
+                "Objectif du moment : comprendre une chose, pas devenir une encyclopedie en pyjama.",
+                "Relis moins, interroge-toi plus. Le rappel actif, c'est le boss final de la revision.",
+                "Fais une carte sur ce qui te semble flou. Le flou devient souvent clair quand on le force a parler."
+            ];
+            document.getElementById("coach-line").textContent = lines[Math.floor(Math.random() * lines.length)];
+            toast("Coach recharge.");
+        }
+
+        function addTask() {
+            const title = document.getElementById("task-title").value.trim();
+            const subject = document.getElementById("task-subject").value;
+            if (!title) return toast("Ecris une mission precise.");
+            state.tasks.unshift({ id: crypto.randomUUID(), title, subject, done: false, date: todayKey() });
+            document.getElementById("task-title").value = "";
+            touchAction();
+            save();
+            toast("Mission ajoutee.");
+        }
+
+        function addPresetTasks(type) {
+            const packs = {
+                exam: ["Relire la lecon en 7 minutes", "Faire 5 flashcards", "Ecrire 3 questions pieges"],
+                oral: ["Lire l'introduction a voix haute", "Chronometrer une reponse de 2 minutes", "Noter 2 exemples precis"],
+                homework: ["Lister les consignes", "Faire le premier exercice", "Verifier les erreurs possibles"]
+            };
+            packs[type].forEach(title => state.tasks.unshift({ id: crypto.randomUUID(), title, subject: "Routine", done: false, date: todayKey() }));
+            touchAction();
+            save();
+            toast("Routine ajoutee.");
+        }
+
+        function toggleTask(id) {
+            const task = state.tasks.find(t => t.id === id);
+            if (!task) return;
+            task.done = !task.done;
+            if (task.done) {
+                touchAction();
+                popConfetti(16);
+            }
+            save();
+        }
+
+        function deleteTask(id) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            save();
+        }
+
+        function setTimerMode(button, minutes) {
+            document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
+            button.classList.add("active");
+            timerTotal = minutes * 60;
+            resetTimer();
+        }
+
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60).toString().padStart(2, "0");
+            const s = (sec % 60).toString().padStart(2, "0");
+            return `${m}:${s}`;
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById("timer-start");
+            if (timerTick) {
+                clearInterval(timerTick);
+                timerTick = null;
+                btn.textContent = "▶ Reprendre";
+                return;
+            }
+            btn.textContent = "⏸ Pause";
+            timerTick = setInterval(() => {
+                timerLeft -= 1;
+                document.getElementById("timer").textContent = formatTime(timerLeft);
+                if (timerLeft <= 0) finishTimer();
+            }, 1000);
+        }
+
+        function finishTimer() {
+            clearInterval(timerTick);
+            timerTick = null;
+            timerLeft = timerTotal;
+            state.stats.focus += 1;
+            touchAction();
+            save();
+            document.getElementById("timer-start").textContent = "▶ Demarrer";
+            document.getElementById("timer").textContent = formatTime(timerLeft);
+            document.getElementById("winSound").play().catch(() => {});
+            popConfetti(40);
+            toast("Session terminee. Pause meritee.");
+        }
+
+        function resetTimer() {
+            clearInterval(timerTick);
+            timerTick = null;
+            timerLeft = timerTotal;
+            document.getElementById("timer").textContent = formatTime(timerLeft);
+            document.getElementById("timer-start").textContent = "▶ Demarrer";
+        }
+
+        function panicMode() {
+            toast("Plan SOS : bois une gorgee d'eau, range 1 objet, fais 3 minutes. Juste 3.");
+            timerTotal = 3 * 60;
+            resetTimer();
+        }
+
+        function addCard() {
+            const q = document.getElementById("card-q").value.trim();
+            const a = document.getElementById("card-a").value.trim();
+            if (!q || !a) return toast("Il faut une question et une reponse.");
+            state.cards.unshift({ id: crypto.randomUUID(), q, a, ok: 0, ko: 0 });
+            document.getElementById("card-q").value = "";
+            document.getElementById("card-a").value = "";
+            touchAction();
+            save();
+            toast("Carte ajoutee.");
+        }
+
+        function addStarterCards() {
+            const starter = [
+                ["Metaphore", "Comparaison sans outil comparatif."],
+                ["Hyperbole", "Exageration volontaire pour produire un effet."],
+                ["Oxymore", "Deux mots opposes reunis dans une expression."],
+                ["Rappel actif", "Essayer de retrouver l'information sans regarder le cours."],
+                ["Bonne revision", "Courte, reguliere, testee, puis corrigee."]
+            ];
+            starter.forEach(([q, a]) => state.cards.unshift({ id: crypto.randomUUID(), q, a, ok: 0, ko: 0 }));
+            touchAction();
+            save();
+            toast("Pack de depart ajoute.");
+        }
+
+        function drawCard() {
+            if (!state.cards.length) return toast("Ajoute d'abord une flashcard.");
+            currentCard = state.cards[Math.floor(Math.random() * state.cards.length)];
+            cardShowingAnswer = false;
+            const el = document.getElementById("study-card");
+            el.textContent = currentCard.q;
+            el.classList.remove("answer");
+        }
+
+        function flipCard() {
+            if (!currentCard) return;
+            cardShowingAnswer = !cardShowingAnswer;
+            const el = document.getElementById("study-card");
+            el.textContent = cardShowingAnswer ? currentCard.a : currentCard.q;
+            el.classList.toggle("answer", cardShowingAnswer);
+        }
+
+        function markCard(ok) {
+            if (!currentCard) return toast("Pioche une carte d'abord.");
+            currentCard[ok ? "ok" : "ko"] += 1;
+            if (ok) state.stats.right += 1;
+            else state.stats.wrong += 1;
+            touchAction();
+            save();
+            toast(ok ? "Bien joue." : "Parfait : tu sais quoi revoir.");
+            drawCard();
+        }
+
+        function deleteCard(id) {
+            state.cards = state.cards.filter(c => c.id !== id);
+            save();
+        }
+
+        function clearCards() {
+            if (!confirm("Effacer toutes les flashcards ?")) return;
+            state.cards = [];
+            currentCard = null;
+            document.getElementById("study-card").textContent = "Ajoute une carte puis clique sur \"Piocher\".";
+            save();
+        }
+
+        function startQuiz() {
+            if (state.cards.length < 2) return toast("Il faut au moins 2 cartes pour fabriquer un quiz.");
+            quizCard = state.cards[Math.floor(Math.random() * state.cards.length)];
+            const wrong = state.cards.filter(c => c.id !== quizCard.id).sort(() => Math.random() - 0.5).slice(0, 3).map(c => c.a);
+            const answers = [quizCard.a, ...wrong].sort(() => Math.random() - 0.5);
+            document.getElementById("quiz-q").textContent = quizCard.q;
+            document.getElementById("quiz-feedback").textContent = "";
+            document.getElementById("quiz-answers").innerHTML = answers.map(a => `<button class="quiz-answer" onclick="answerQuiz(this)">${escapeHtml(a)}</button>`).join("");
+        }
+
+        function answerQuiz(btn) {
+            if (!quizCard) return;
+            const ok = btn.textContent === quizCard.a;
+            btn.classList.add(ok ? "correct" : "wrong");
+            document.querySelectorAll(".quiz-answer").forEach(b => {
+                b.disabled = true;
+                if (b.textContent === quizCard.a) b.classList.add("correct");
+            });
+            state.stats[ok ? "right" : "wrong"] += 1;
+            touchAction();
+            save();
+            document.getElementById("quiz-feedback").textContent = ok ? "Bonne reponse. On garde le rythme." : `La bonne reponse etait : ${quizCard.a}`;
+            if (ok) popConfetti(18);
+        }
+
+        function makeQuizFromNotes() {
+            const text = document.getElementById("note-body").value;
+            const lines = text.split("\n").map(l => l.trim()).filter(l => l.includes(":"));
+            if (!lines.length) return toast("Astuce : ecris des lignes comme Mot : definition.");
+            lines.slice(0, 8).forEach(line => {
+                const [q, ...rest] = line.split(":");
+                const a = rest.join(":").trim();
+                if (q.trim() && a) state.cards.unshift({ id: crypto.randomUUID(), q: q.trim(), a, ok: 0, ko: 0 });
+            });
+            touchAction();
+            save();
+            toast("Cartes creees depuis tes notes.");
+            go("cards");
+        }
+
+        function saveNote() {
+            const title = document.getElementById("note-title").value.trim() || "Fiche sans titre";
+            const body = document.getElementById("note-body").value.trim();
+            if (!body) return toast("Ecris quelque chose dans ta fiche.");
+            const id = state.currentNoteId || crypto.randomUUID();
+            const existing = state.notes.find(n => n.id === id);
+            if (existing) {
+                existing.title = title;
+                existing.body = body;
+                existing.updated = new Date().toLocaleDateString("fr-FR");
+            } else {
+                state.notes.unshift({ id, title, body, updated: new Date().toLocaleDateString("fr-FR") });
+                state.currentNoteId = id;
+            }
+            touchAction();
+            save();
+            toast("Fiche sauvegardee.");
+        }
+
+        function loadNote(id) {
+            const note = state.notes.find(n => n.id === id);
+            if (!note) return;
+            state.currentNoteId = id;
+            document.getElementById("note-title").value = note.title;
+            document.getElementById("note-body").value = note.body;
+            updateNoteStats();
+            save();
+        }
+
+        function deleteNote(id) {
+            state.notes = state.notes.filter(n => n.id !== id);
+            if (state.currentNoteId === id) {
+                state.currentNoteId = null;
+                document.getElementById("note-title").value = "";
+                document.getElementById("note-body").value = "";
+            }
+            save();
+        }
+
+        function insertTemplate() {
+            document.getElementById("note-body").value += "\n\nObjectif :\nDefinitions :\nExemple important :\nQuestion piege :\nA revoir demain :\n";
+            updateNoteStats();
+        }
+
+        function insertMethod(type) {
+            const snippets = {
+                feynman: "\n\nMethode Feynman :\n1. J'explique avec des mots simples.\n2. Je repere ce qui bloque.\n3. Je reformule en une phrase claire.\n",
+                active: "\n\nRappel actif :\nQuestion :\nReponse sans regarder :\nCorrection :\n",
+                mistakes: "\n\nMes erreurs a eviter :\n- \n- \n- \n"
+            };
+            document.getElementById("note-body").value += snippets[type];
+            updateNoteStats();
+        }
+
+        function spinWheel() {
+            const missions = [
+                "Faire 5 flashcards",
+                "Relire une fiche pendant 4 minutes",
+                "Expliquer une notion a voix haute",
+                "Faire un focus de 10 minutes",
+                "Trouver 3 exemples",
+                "Corriger une ancienne erreur"
+            ];
+            const wheel = document.getElementById("wheel");
+            const turns = 720 + Math.floor(Math.random() * 720);
+            wheel.style.transform = `rotate(${turns}deg)`;
+            const result = missions[Math.floor(Math.random() * missions.length)];
+            setTimeout(() => {
+                document.getElementById("wheel-result").textContent = result;
+                toast("Mission choisie : " + result);
+            }, 2100);
+        }
+
+        function startMemory() {
+            memoryAnswer = Math.random().toString(36).slice(2, 6).toUpperCase();
+            document.getElementById("memory-code").textContent = memoryAnswer;
+            document.getElementById("memory-input").value = "";
+            setTimeout(() => {
+                document.getElementById("memory-code").textContent = "????";
+                document.getElementById("memory-input").focus();
+            }, 1800);
+        }
+
+        function checkMemory() {
+            const value = document.getElementById("memory-input").value.trim().toUpperCase();
+            if (!memoryAnswer) return toast("Lance d'abord un code.");
+            if (value === memoryAnswer) {
+                touchAction();
+                save();
+                popConfetti(22);
+                toast("Memoire validee.");
+            } else {
+                toast("Presque. Le code etait " + memoryAnswer + ".");
+            }
+        }
+
+        function panicMessageForNextAction() {
+            const undone = state.tasks.filter(t => !t.done);
+            if (undone.length) return `Commence par : ${undone[0].title}`;
+            if (!state.cards.length) return "Cree 3 flashcards avec les notions difficiles.";
+            if (!state.notes.length) return "Redige une mini-fiche de 8 lignes.";
+            return "Lance un focus de 10 minutes ou fais un quiz rapide.";
+        }
+
+        function updateNoteStats() {
+            const words = document.getElementById("note-body").value.trim().split(/\s+/).filter(Boolean).length;
+            document.getElementById("note-stats").textContent = `${words} mot${words > 1 ? "s" : ""}`;
+        }
+
+        document.getElementById("note-body").addEventListener("input", updateNoteStats);
+        document.getElementById("task-title").addEventListener("keydown", e => { if (e.key === "Enter") addTask(); });
+        document.getElementById("card-a").addEventListener("keydown", e => { if (e.key === "Enter") addCard(); });
+
+        function renderAll() {
+            renderMetrics();
+            renderTasks();
+            renderCards();
+            renderNotes();
+            updateNoteStats();
+        }
+
+        function renderMetrics() {
+            const total = state.stats.right + state.stats.wrong;
+            document.getElementById("streak").textContent = state.stats.streak || 0;
+            document.getElementById("m-focus").textContent = state.stats.focus || 0;
+            document.getElementById("m-cards").textContent = state.cards.length;
+            document.getElementById("m-score").textContent = total ? Math.round(state.stats.right / total * 100) + "%" : "0%";
+            document.getElementById("next-action").textContent = panicMessageForNextAction();
+        }
+
+        function renderTasks() {
+            const list = document.getElementById("tasks");
+            if (!state.tasks.length) {
+                list.innerHTML = `<p class="subtle">Aucune mission. Ajoute une premiere petite action.</p>`;
+            } else {
+                list.innerHTML = state.tasks.map(t => `
+                    <div class="task ${t.done ? "done" : ""}">
+                        <input class="check" type="checkbox" ${t.done ? "checked" : ""} onchange="toggleTask('${t.id}')" aria-label="Cocher la mission">
+                        <div>
+                            <div class="task-title">${escapeHtml(t.title)}</div>
+                            <div class="task-meta">${escapeHtml(t.subject)} - ${escapeHtml(t.date)}</div>
+                        </div>
+                        <button class="ghost" onclick="deleteTask('${t.id}')" title="Supprimer">✕</button>
+                    </div>
+                `).join("");
+            }
+            const done = state.tasks.filter(t => t.done).length;
+            const pct = state.tasks.length ? Math.round(done / state.tasks.length * 100) : 0;
+            document.getElementById("task-progress").style.width = pct + "%";
+            document.getElementById("task-progress-text").textContent = `${pct}% du plan termine.`;
+        }
+
+        function renderCards() {
+            const list = document.getElementById("card-list");
+            if (!state.cards.length) {
+                list.innerHTML = `<p class="subtle">Pas encore de cartes. Le pack de depart peut t'aider.</p>`;
+                return;
+            }
+            list.innerHTML = state.cards.map(c => `
+                <div class="item">
+                    <div><strong>${escapeHtml(c.q)}</strong><small>${escapeHtml(c.a)} - ${c.ok} ok / ${c.ko} a revoir</small></div>
+                    <button class="ghost" onclick="deleteCard('${c.id}')" title="Supprimer">✕</button>
+                </div>
+            `).join("");
+        }
+
+        function renderNotes() {
+            const list = document.getElementById("note-list");
+            if (!state.notes.length) {
+                list.innerHTML = `<p class="subtle">Tes fiches sauvegardees apparaitront ici.</p>`;
+                return;
+            }
+            list.innerHTML = state.notes.map(n => `
+                <div class="item">
+                    <button class="quiz-answer" onclick="loadNote('${n.id}')"><strong>${escapeHtml(n.title)}</strong><small>Modifiee le ${escapeHtml(n.updated)}</small></button>
+                    <button class="ghost" onclick="deleteNote('${n.id}')" title="Supprimer">✕</button>
+                </div>
+            `).join("");
+        }
+
+        function popConfetti(count) {
+            const colors = ["#3eb489", "#2f80ed", "#f4c95d", "#ff6b5f", "#7c5cff"];
+            for (let i = 0; i < count; i++) {
+                const piece = document.createElement("div");
+                piece.className = "confetti";
+                piece.style.left = Math.random() * 100 + "vw";
+                piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.animationDelay = Math.random() * 0.25 + "s";
+                document.body.appendChild(piece);
+                setTimeout(() => piece.remove(), 1500);
+            }
+        }
+
+        function escapeHtml(text) {
+            return String(text).replace(/[&<>"']/g, ch => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#039;"
+            }[ch]));
+        }
+
+        renderAll();
+        resetTimer();
+    </script>
+</body>
+</html>
