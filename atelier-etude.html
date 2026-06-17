@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atelier d'etude</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <style>
+    :root {
+      --ink: #172126;
+      --muted: #63717a;
+      --paper: #f4faf6;
+      --panel: #ffffff;
+      --line: #dfe7e3;
+      --mint: #3eb489;
+      --blue: #2f80ed;
+      --yellow: #f4c95d;
+      --coral: #ff6b5f;
+      --shadow: 0 16px 42px rgba(42, 54, 59, .12);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(90deg, rgba(47, 128, 237, .06) 1px, transparent 1px),
+        linear-gradient(rgba(62, 180, 137, .07) 1px, transparent 1px),
+        var(--paper);
+      background-size: 28px 28px;
+    }
+
+    button, input, textarea { font: inherit; }
+    button { border: 0; cursor: pointer; }
+    input, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      color: var(--ink);
+      padding: 11px 12px;
+      outline: 0;
+    }
+    textarea { min-height: 160px; resize: vertical; line-height: 1.5; }
+    input:focus, textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47,128,237,.13); }
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 2px; font-size: clamp(28px, 4vw, 44px); letter-spacing: 0; }
+    h2 { margin-bottom: 14px; font-size: 23px; }
+    h3 { margin-bottom: 8px; font-size: 16px; }
+    p { color: var(--muted); line-height: 1.5; }
+
+    .shell {
+      width: min(1160px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 34px;
+    }
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      padding-bottom: 18px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: conic-gradient(from 210deg, var(--mint), var(--yellow), var(--coral), var(--blue), var(--mint));
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 950;
+      box-shadow: var(--shadow);
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .topbar .row { justify-content: flex-end; }
+    .primary, .secondary, .ghost, .danger {
+      min-height: 42px;
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-weight: 900;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .primary { background: var(--mint); color: white; }
+    .secondary { background: var(--blue); color: white; }
+    .ghost { background: #eef3f1; color: var(--ink); border: 1px solid var(--line); }
+    .danger { background: var(--coral); color: white; }
+    .timer {
+      text-align: center;
+      font-size: clamp(58px, 12vw, 108px);
+      font-weight: 950;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      margin: 10px 0 18px;
+    }
+    .task-list, .note-list { display: grid; gap: 8px; margin-top: 12px; }
+    .task, .note-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfdfc;
+    }
+    .task.done .task-title { color: var(--muted); text-decoration: line-through; }
+    .task-title { font-weight: 850; }
+    .task small, .note-item small { display: block; color: var(--muted); margin-top: 3px; }
+    .check { width: 20px; height: 20px; accent-color: var(--mint); }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+    .metric {
+      min-height: 92px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fbfdfc;
+      padding: 14px;
+      display: grid;
+      align-content: center;
+    }
+    .metric strong { font-size: 28px; color: #227a63; }
+    .metric span { color: var(--muted); font-size: 13px; font-weight: 800; }
+    .subtle { color: var(--muted); margin-bottom: 0; }
+
+    @media (max-width: 860px) {
+      .topbar, .grid, .metrics { grid-template-columns: 1fr; }
+      .topbar .row { justify-content: flex-start; }
+      .row > * { flex: 1 1 150px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">G</div>
+        <div>
+          <h1>Atelier d'etude</h1>
+          <p class="subtle">Un espace rapide pour planifier, reviser, prendre des notes et rester concentre.</p>
+        </div>
+      </div>
+      <nav class="row" aria-label="Navigation principale">
+        <a class="secondary" href="index.html">Retour a l'Atlas</a>
+        <a class="ghost" href="cv-lettre.html">CV & lettre</a>
+        <a class="ghost" href="convertisseur-fichiers.html">Convertisseur</a>
+        <a class="ghost" href="recettes-planificateur.html">Recettes</a>
+      </nav>
+    </header>
+
+    <section class="metrics">
+      <div class="metric"><strong id="m-tasks">0</strong><span>Missions</span></div>
+      <div class="metric"><strong id="m-done">0%</strong><span>Plan termine</span></div>
+      <div class="metric"><strong id="m-notes">0</strong><span>Notes</span></div>
+    </section>
+
+    <main class="grid">
+      <section class="panel">
+        <h2>Plan du jour</h2>
+        <div class="row">
+          <input id="task-input" placeholder="Ex : revoir le chapitre 3">
+          <button class="primary" type="button" onclick="addTask()">Ajouter</button>
+        </div>
+        <div class="task-list" id="task-list"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Focus</h2>
+        <div class="timer" id="timer">25:00</div>
+        <div class="row">
+          <button class="primary" type="button" onclick="startTimer()">Start</button>
+          <button class="ghost" type="button" onclick="pauseTimer()">Pause</button>
+          <button class="danger" type="button" onclick="resetTimer()">Reset</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Notes</h2>
+        <input id="note-title" placeholder="Titre de la fiche">
+        <textarea id="note-body" placeholder="Definitions, exemples, questions pieges..."></textarea>
+        <div class="row">
+          <button class="primary" type="button" onclick="saveNote()">Sauvegarder</button>
+          <button class="ghost" type="button" onclick="clearNote()">Nouvelle note</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Fiches sauvegardees</h2>
+        <div class="note-list" id="note-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const KEY = "atelier-etude-lite-v1";
+    let state = load();
+    let currentNoteId = null;
+    let seconds = 25 * 60;
+    let timerId = null;
+
+    function load() {
+      try {
+        const data = JSON.parse(localStorage.getItem(KEY) || "{}");
+        return { tasks: data.tasks || [], notes: data.notes || [] };
+      } catch {
+        return { tasks: [], notes: [] };
+      }
+    }
+
+    function save() {
+      localStorage.setItem(KEY, JSON.stringify(state));
+      render();
+    }
+
+    function addTask() {
+      const input = document.getElementById("task-input");
+      const title = input.value.trim();
+      if (!title) return;
+      state.tasks.unshift({ id: Date.now().toString(36), title, done: false, date: new Date().toLocaleDateString("fr-FR") });
+      input.value = "";
+      save();
+    }
+
+    function toggleTask(id) {
+      const task = state.tasks.find(item => item.id === id);
+      if (task) task.done = !task.done;
+      save();
+    }
+
+    function deleteTask(id) {
+      state.tasks = state.tasks.filter(item => item.id !== id);
+      save();
+    }
+
+    function startTimer() {
+      if (timerId) return;
+      timerId = setInterval(() => {
+        seconds = Math.max(0, seconds - 1);
+        drawTimer();
+        if (seconds === 0) pauseTimer();
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      clearInterval(timerId);
+      timerId = null;
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      seconds = 25 * 60;
+      drawTimer();
+    }
+
+    function drawTimer() {
+      const min = String(Math.floor(seconds / 60)).padStart(2, "0");
+      const sec = String(seconds % 60).padStart(2, "0");
+      document.getElementById("timer").textContent = `${min}:${sec}`;
+    }
+
+    function saveNote() {
+      const title = document.getElementById("note-title").value.trim() || "Fiche sans titre";
+      const body = document.getElementById("note-body").value.trim();
+      if (!body) return;
+      const id = currentNoteId || Date.now().toString(36);
+      const existing = state.notes.find(item => item.id === id);
+      if (existing) {
+        existing.title = title;
+        existing.body = body;
+        existing.date = new Date().toLocaleDateString("fr-FR");
+      } else {
+        state.notes.unshift({ id, title, body, date: new Date().toLocaleDateString("fr-FR") });
+      }
+      currentNoteId = id;
+      save();
+    }
+
+    function loadNote(id) {
+      const note = state.notes.find(item => item.id === id);
+      if (!note) return;
+      currentNoteId = id;
+      document.getElementById("note-title").value = note.title;
+      document.getElementById("note-body").value = note.body;
+    }
+
+    function deleteNote(id) {
+      state.notes = state.notes.filter(item => item.id !== id);
+      if (currentNoteId === id) clearNote();
+      save();
+    }
+
+    function clearNote() {
+      currentNoteId = null;
+      document.getElementById("note-title").value = "";
+      document.getElementById("note-body").value = "";
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[char]));
+    }
+
+    function render() {
+      const done = state.tasks.filter(task => task.done).length;
+      const pct = state.tasks.length ? Math.round(done / state.tasks.length * 100) : 0;
+      document.getElementById("m-tasks").textContent = state.tasks.length;
+      document.getElementById("m-done").textContent = pct + "%";
+      document.getElementById("m-notes").textContent = state.notes.length;
+      document.getElementById("task-list").innerHTML = state.tasks.length ? state.tasks.map(task => `
+        <div class="task ${task.done ? "done" : ""}">
+          <input class="check" type="checkbox" ${task.done ? "checked" : ""} onchange="toggleTask('${task.id}')">
+          <div><div class="task-title">${escapeHtml(task.title)}</div><small>${escapeHtml(task.date)}</small></div>
+          <button class="ghost" type="button" onclick="deleteTask('${task.id}')">X</button>
+        </div>
+      `).join("") : `<p class="subtle">Aucune mission pour l'instant.</p>`;
+      document.getElementById("note-list").innerHTML = state.notes.length ? state.notes.map(note => `
+        <div class="note-item">
+          <button class="ghost" type="button" onclick="loadNote('${note.id}')">Ouvrir</button>
+          <div><strong>${escapeHtml(note.title)}</strong><small>${escapeHtml(note.date)}</small></div>
+          <button class="ghost" type="button" onclick="deleteNote('${note.id}')">X</button>
+        </div>
+      `).join("") : `<p class="subtle">Tes notes sauvegardees apparaitront ici.</p>`;
+    }
+
+    document.getElementById("task-input").addEventListener("keydown", event => {
+      if (event.key === "Enter") addTask();
+    });
+    drawTimer();
+    render();
+  </script>
+</body>
+</html>

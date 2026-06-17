@@ -493,7 +493,7 @@
       .mark { width: 40px; height: 40px; flex-basis: 40px; }
       .status-strip { grid-template-columns: 1fr; }
       .search-row { grid-template-columns: 1fr; }
-      .button-row > button { flex: 1 1 150px; }
+      .button-row > button, .button-row > a { flex: 1 1 150px; }
       .detail-media, .photo-preview { grid-template-columns: 1fr 1fr; }
       .modal { padding: 10px; }
       .rating-input { grid-template-columns: repeat(5, minmax(0, 1fr)); }
@@ -529,6 +529,9 @@
           <div class="module-body">
             <div class="button-row">
               <a class="ghost" href="atelier-etude.html"><i data-lucide="book-open-check"></i>Atelier d'etude</a>
+              <a class="ghost" href="cv-lettre.html"><i data-lucide="file-user"></i>CV & lettre</a>
+              <a class="ghost" href="convertisseur-fichiers.html"><i data-lucide="refresh-cw"></i>Convertisseur</a>
+              <a class="ghost" href="recettes-planificateur.html"><i data-lucide="utensils"></i>Recettes</a>
               <button class="primary" type="button" id="add-trip"><i data-lucide="plus"></i>Ajouter</button>
               <button class="secondary" type="button" id="export-data"><i data-lucide="download"></i>Exporter</button>
               <button class="ghost" type="button" id="import-data"><i data-lucide="upload"></i>Importer</button>

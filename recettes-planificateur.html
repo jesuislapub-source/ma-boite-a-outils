@@ -1,0 +1,2525 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu de maman - Recettes et courses</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <style>
+    :root {
+      --cream: #fff8ef;
+      --cream-strong: #fff1df;
+      --paper: #ffffff;
+      --ink: #1f2933;
+      --soft-ink: #5c6670;
+      --line: #eadfce;
+      --orange: #e4572e;
+      --orange-dark: #bd3f1e;
+      --green: #2f855a;
+      --green-soft: #e6f4ec;
+      --yellow: #f6c453;
+      --red: #d64545;
+      --blue: #3465d9;
+      --shadow: 0 18px 44px rgba(74, 51, 31, .13);
+      --radius: 18px;
+      --tap: 52px;
+      --base-size: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--cream); scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: var(--base-size);
+      background:
+        linear-gradient(90deg, rgba(228, 87, 46, .05) 1px, transparent 1px),
+        linear-gradient(rgba(47, 133, 90, .05) 1px, transparent 1px),
+        var(--cream);
+      background-size: 32px 32px;
+      padding-bottom: 92px;
+    }
+    body[data-font="large"] { --base-size: 18px; }
+    body[data-font="xlarge"] { --base-size: 20px; }
+
+    button, input, select { font: inherit; }
+    button { border: 0; cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible {
+      outline: 4px solid rgba(52, 101, 217, .24);
+      outline-offset: 2px;
+    }
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 5px; font-size: clamp(30px, 9vw, 44px); line-height: 1; letter-spacing: 0; }
+    h2 { margin-bottom: 0; font-size: 22px; letter-spacing: 0; }
+    h3 { margin-bottom: 4px; font-size: 17px; letter-spacing: 0; }
+    p { color: var(--soft-ink); line-height: 1.48; }
+    img { display: block; max-width: 100%; }
+
+    .app {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      min-width: 0;
+    }
+
+    .hero {
+      min-height: 280px;
+      color: white;
+      background:
+        linear-gradient(180deg, rgba(45, 28, 18, .18), rgba(45, 28, 18, .78)),
+        url("https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1400&q=80") center/cover;
+      display: grid;
+      align-content: end;
+      padding: 22px 16px 18px;
+      border-bottom-left-radius: 28px;
+      border-bottom-right-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+    .top-actions {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .quiet-link, .hero-chip {
+      min-height: 42px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 12px;
+      color: white;
+      background: rgba(31, 41, 51, .42);
+      border: 1px solid rgba(255, 255, 255, .28);
+      backdrop-filter: blur(12px);
+      font-weight: 850;
+      font-size: .9rem;
+    }
+    .hero-content { max-width: 620px; }
+    .hero .eyebrow {
+      margin-bottom: 8px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .11em;
+      font-size: .78rem;
+    }
+    .hero p { color: rgba(255,255,255,.88); margin-bottom: 0; max-width: 580px; }
+
+    .content {
+      display: grid;
+      gap: 14px;
+      padding: 14px 12px 22px;
+      min-width: 0;
+    }
+    .content > *, .content-main, .content-side, .stack, .panel, .section-view { min-width: 0; }
+
+    .panel, .meal-card, .recipe-card, .shopping-card, .setting-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .96);
+      box-shadow: var(--shadow);
+    }
+    .panel { padding: 14px; }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .stack { display: grid; gap: 12px; }
+    .section-view { display: none; gap: 14px; }
+    .section-view.active { display: grid; }
+
+    .primary, .secondary, .ghost, .danger, .tiny-button {
+      min-height: var(--tap);
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      padding: 12px 16px;
+      font-weight: 900;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+      touch-action: manipulation;
+      white-space: nowrap;
+    }
+    .primary {
+      color: white;
+      background: linear-gradient(135deg, var(--orange), var(--orange-dark));
+      box-shadow: 0 12px 24px rgba(228, 87, 46, .25);
+    }
+    .secondary { color: white; background: var(--green); box-shadow: 0 12px 24px rgba(47, 133, 90, .2); }
+    .ghost { color: var(--ink); background: var(--cream-strong); border: 1px solid var(--line); }
+    .danger { color: white; background: var(--red); }
+    .tiny-button { min-height: 42px; padding: 9px 12px; font-size: .92rem; color: var(--orange-dark); background: #fff3ea; }
+    .primary:hover, .secondary:hover, .ghost:hover, .danger:hover, .tiny-button:hover { transform: translateY(-1px); }
+
+    .button-row { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+    .button-row > button, .button-row > a { flex: 1 1 160px; }
+
+    .mode-scroller {
+      display: flex;
+      gap: 9px;
+      overflow-x: auto;
+      padding: 2px 0 8px;
+      scrollbar-width: none;
+    }
+    .mode-scroller::-webkit-scrollbar { display: none; }
+    .mode-chip {
+      position: relative;
+      flex: 0 0 auto;
+      min-height: 48px;
+      border-radius: 999px;
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--soft-ink);
+      background: var(--paper);
+      border: 1px solid var(--line);
+      font-weight: 900;
+    }
+    .mode-chip input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .mode-chip:has(input:checked) {
+      color: white;
+      border-color: transparent;
+      background: var(--green);
+      box-shadow: 0 12px 22px rgba(47, 133, 90, .22);
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .mini-stat {
+      min-height: 86px;
+      border-radius: 16px;
+      background: var(--cream-strong);
+      padding: 13px;
+      display: grid;
+      align-content: center;
+      gap: 2px;
+    }
+    .mini-stat strong { font-size: 1.5rem; color: var(--orange-dark); }
+    .mini-stat span { color: var(--soft-ink); font-weight: 850; font-size: .88rem; }
+
+    .today-card {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, #fff, #fff4e7);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    .today-card h2 { color: var(--orange-dark); }
+
+    .week-strip {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding: 2px 2px 10px;
+    }
+    .day-card {
+      flex: 0 0 min(82vw, 360px);
+      scroll-snap-align: start;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255,255,255,.96);
+      box-shadow: var(--shadow);
+      padding: 13px;
+      display: grid;
+      gap: 10px;
+    }
+    .day-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      color: var(--orange-dark);
+      font-weight: 950;
+    }
+    .day-title span {
+      color: var(--soft-ink);
+      font-size: .88rem;
+      font-weight: 850;
+    }
+
+    .meal-card {
+      display: grid;
+      grid-template-columns: 82px minmax(0, 1fr);
+      gap: 12px;
+      padding: 10px;
+      box-shadow: none;
+      cursor: pointer;
+    }
+    .meal-card:active { transform: scale(.99); }
+    .meal-photo {
+      width: 82px;
+      height: 82px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #fbe1ce, #e9f6ee);
+      overflow: hidden;
+    }
+    .meal-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .meal-body { min-width: 0; display: grid; gap: 5px; }
+    .meal-label { color: var(--green); font-weight: 950; font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; }
+    .meal-title { color: var(--ink); font-size: 1rem; font-weight: 950; line-height: 1.16; }
+    .meal-meta { color: var(--soft-ink); font-size: .88rem; font-weight: 800; }
+    .meal-actions { display: flex; gap: 8px; align-items: center; justify-content: flex-start; flex-wrap: wrap; }
+
+    .recipe-grid {
+      display: grid;
+      gap: 12px;
+    }
+    .recipe-card {
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      min-height: 132px;
+      box-shadow: var(--shadow);
+    }
+    .recipe-card .recipe-photo {
+      background: linear-gradient(135deg, #fbe1ce, #e9f6ee);
+      min-height: 132px;
+    }
+    .recipe-card img { width: 100%; height: 100%; object-fit: cover; }
+    .recipe-info { min-width: 0; padding: 12px; display: grid; gap: 8px; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 28px;
+      border-radius: 999px;
+      padding: 5px 8px;
+      color: var(--soft-ink);
+      background: var(--cream-strong);
+      font-size: .78rem;
+      font-weight: 900;
+    }
+    .tag.green { color: var(--green); background: var(--green-soft); }
+    .tag.orange { color: var(--orange-dark); background: #fff0e8; }
+
+    .search-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 9px;
+    }
+    input[type="search"], select {
+      width: 100%;
+      min-height: var(--tap);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink);
+      background: var(--paper);
+      padding: 12px 15px;
+      outline: 0;
+      font-weight: 800;
+    }
+
+    .shopping-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .category-block {
+      display: grid;
+      gap: 9px;
+    }
+    .category-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 8px;
+      color: var(--orange-dark);
+      font-weight: 950;
+    }
+    .shopping-card {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      box-shadow: none;
+    }
+    .shopping-card.checked {
+      opacity: .56;
+      background: #f4f1ec;
+    }
+    .ingredient-img {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--cream-strong);
+    }
+    .ingredient-img img { width: 100%; height: 100%; object-fit: cover; }
+    .shopping-name { font-weight: 950; }
+    .shopping-qty { color: var(--soft-ink); font-size: .9rem; font-weight: 850; }
+    .check-box {
+      width: 30px;
+      height: 30px;
+      accent-color: var(--green);
+    }
+
+    .settings-grid {
+      display: grid;
+      gap: 10px;
+    }
+    .setting-card {
+      padding: 13px;
+      box-shadow: none;
+      display: grid;
+      gap: 9px;
+    }
+    .day-toggle-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+    .day-toggle, .font-toggle {
+      position: relative;
+      min-height: 48px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 9px 12px;
+      background: var(--paper);
+      color: var(--soft-ink);
+      font-weight: 900;
+    }
+    .day-toggle input, .font-toggle input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .day-toggle:has(input:checked), .font-toggle:has(input:checked) {
+      color: white;
+      background: var(--green);
+      border-color: transparent;
+    }
+
+    .drive-panel {
+      border: 1px solid #d5e8d8;
+      border-radius: 18px;
+      padding: 13px;
+      background: #f1fbf3;
+      display: grid;
+      gap: 10px;
+    }
+    .drive-panel p { margin-bottom: 0; }
+    .drive-list {
+      max-height: 170px;
+      overflow: auto;
+      border-radius: 14px;
+      background: white;
+      border: 1px solid #d5e8d8;
+      padding: 10px;
+      color: var(--soft-ink);
+      font-size: .92rem;
+      line-height: 1.55;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 10px;
+      z-index: 30;
+      transform: translateX(-50%);
+      width: min(520px, calc(100% - 18px));
+      min-height: 70px;
+      border: 1px solid rgba(234, 223, 206, .92);
+      border-radius: 24px;
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 14px 44px rgba(74, 51, 31, .18);
+      backdrop-filter: blur(16px);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      padding: 7px;
+    }
+    .nav-button {
+      min-width: 0;
+      min-height: 56px;
+      border-radius: 18px;
+      color: var(--soft-ink);
+      background: transparent;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      font-size: .76rem;
+      font-weight: 950;
+    }
+    .nav-button svg { width: 21px; height: 21px; }
+    .nav-button.active { color: white; background: var(--orange); }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: none;
+      background: rgba(31, 41, 51, .52);
+      backdrop-filter: blur(8px);
+    }
+    .modal.open { display: block; }
+    .recipe-sheet {
+      position: absolute;
+      inset: auto 0 0;
+      max-height: 94vh;
+      overflow: auto;
+      border-top-left-radius: 28px;
+      border-top-right-radius: 28px;
+      background: var(--cream);
+      box-shadow: 0 -18px 42px rgba(31, 41, 51, .22);
+    }
+    .sheet-photo {
+      height: 230px;
+      background: linear-gradient(135deg, #fbe1ce, #e9f6ee);
+      position: relative;
+      overflow: hidden;
+      border-top-left-radius: 28px;
+      border-top-right-radius: 28px;
+    }
+    .sheet-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .close-sheet {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+      color: var(--ink);
+      background: rgba(255,255,255,.92);
+      display: grid;
+      place-items: center;
+      box-shadow: var(--shadow);
+    }
+    .sheet-content {
+      display: grid;
+      gap: 14px;
+      padding: 16px 14px 24px;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .info-box {
+      min-height: 78px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: white;
+      padding: 11px;
+      display: grid;
+      align-content: center;
+    }
+    .info-box strong { color: var(--orange-dark); font-size: 1.2rem; }
+    .info-box span { color: var(--soft-ink); font-weight: 850; font-size: .86rem; }
+    .step-list, .ingredient-list {
+      margin: 0;
+      padding-left: 24px;
+      color: var(--ink);
+      line-height: 1.55;
+    }
+    .step-list li, .ingredient-list li { margin-bottom: 9px; }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 92px;
+      z-index: 60;
+      transform: translate(-50%, 18px);
+      width: min(520px, calc(100% - 24px));
+      min-height: 50px;
+      border-radius: 999px;
+      color: white;
+      background: rgba(31, 41, 51, .94);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 12px 16px;
+      font-weight: 900;
+      box-shadow: var(--shadow);
+    }
+    .toast.show { display: flex; animation: rise .2s ease both; }
+    @keyframes rise { to { transform: translate(-50%, 0); } }
+
+    .empty-state {
+      border: 1px dashed var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      color: var(--soft-ink);
+      background: rgba(255,255,255,.7);
+      text-align: center;
+      font-weight: 850;
+    }
+
+    @media (min-width: 860px) {
+      body { padding-bottom: 0; }
+      .hero {
+        min-height: 360px;
+        padding: 28px;
+        border-bottom-left-radius: 34px;
+        border-bottom-right-radius: 34px;
+      }
+      .content {
+        grid-template-columns: 360px minmax(0, 1fr);
+        align-items: start;
+        padding: 18px;
+      }
+      .content-main { grid-column: 2; }
+      .content-side { grid-column: 1; grid-row: 1; position: sticky; top: 14px; }
+      .section-view.active { display: grid; }
+      .week-strip {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        overflow: visible;
+      }
+      .day-card { min-width: 0; flex-basis: auto; }
+      .recipe-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .bottom-nav {
+        left: 18px;
+        top: 18px;
+        bottom: auto;
+        transform: none;
+        width: auto;
+        min-height: 56px;
+        grid-template-columns: repeat(4, 104px);
+      }
+      .recipe-sheet {
+        inset: 4vh calc((100vw - min(760px, 94vw)) / 2) auto;
+        max-height: 92vh;
+        border-radius: 28px;
+      }
+      .sheet-photo {
+        border-top-left-radius: 28px;
+        border-top-right-radius: 28px;
+      }
+      .info-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 380px) {
+      .meal-card { grid-template-columns: 72px minmax(0, 1fr); }
+      .meal-photo { width: 72px; height: 72px; }
+      .recipe-card { grid-template-columns: 92px minmax(0, 1fr); }
+      .quick-grid, .shopping-summary, .day-toggle-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body data-font="normal">
+  <div class="app">
+    <header class="hero">
+      <div class="top-actions">
+        <a class="quiet-link" href="index.html"><i data-lucide="arrow-left"></i>Atlas</a>
+        <span class="hero-chip" id="active-mode-label">Mode rapide</span>
+      </div>
+      <div class="hero-content">
+        <div class="eyebrow">Cuisine de la semaine</div>
+        <h1>Menu de maman</h1>
+        <p>Des repas simples, une liste de courses claire, et moins de questions a 18h30.</p>
+      </div>
+    </header>
+
+    <div class="content">
+      <aside class="content-side stack">
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Mode repas</h2>
+          </div>
+          <div class="mode-scroller" id="mode-list" aria-label="Modes alimentaires"></div>
+          <div class="button-row">
+            <button class="primary" type="button" id="generate-week"><i data-lucide="sparkles"></i>Generer ma semaine</button>
+            <button class="ghost" type="button" id="open-shopping-shortcut"><i data-lucide="shopping-basket"></i>Voir les courses</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header"><h2>Resume</h2></div>
+          <div class="quick-grid">
+            <div class="mini-stat"><strong id="stat-meals">0</strong><span>repas prevus</span></div>
+            <div class="mini-stat"><strong id="stat-items">0</strong><span>produits courses</span></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header"><h2>Besoin special</h2></div>
+          <div class="button-row">
+            <button class="ghost" type="button" id="shuffle-today"><i data-lucide="refresh-cw"></i>Changer aujourd'hui</button>
+            <button class="ghost" type="button" id="copy-week"><i data-lucide="copy"></i>Copier semaine</button>
+          </div>
+        </section>
+      </aside>
+
+      <main class="content-main">
+        <section class="section-view active" id="view-week" aria-labelledby="week-title">
+          <article class="today-card">
+            <div class="panel-header">
+              <h2 id="week-title">Aujourd'hui</h2>
+              <span class="tag green" id="today-name">Lundi</span>
+            </div>
+            <div class="stack" id="today-meals"></div>
+          </article>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>Planning 7 jours</h2>
+              <button class="tiny-button" type="button" id="clear-week">Vider</button>
+            </div>
+            <div class="week-strip" id="week-plan"></div>
+          </section>
+        </section>
+
+        <section class="section-view" id="view-recipes" aria-labelledby="recipes-title">
+          <section class="panel">
+            <div class="panel-header">
+              <h2 id="recipes-title">Toutes les recettes</h2>
+            </div>
+            <p>Choisis un jour, un repas, puis ajoute directement la recette au planning.</p>
+            <div class="search-row">
+              <input id="recipe-search" type="search" placeholder="Chercher une recette simple...">
+              <select id="recipe-target-day" aria-label="Jour ou ajouter la recette"></select>
+              <select id="recipe-target-slot" aria-label="Repas ou ajouter la recette">
+                <option value="midi">Dejeuner</option>
+                <option value="soir">Diner</option>
+              </select>
+            </div>
+          </section>
+          <div class="recipe-grid" id="recipe-grid"></div>
+        </section>
+
+        <section class="section-view" id="view-shopping" aria-labelledby="shopping-title">
+          <section class="panel">
+            <div class="panel-header">
+              <h2 id="shopping-title">Liste de courses</h2>
+              <button class="tiny-button" type="button" id="uncheck-all">Tout decocher</button>
+            </div>
+            <div class="shopping-summary">
+              <div class="mini-stat"><strong id="shopping-total">0</strong><span>produits</span></div>
+              <div class="mini-stat"><strong id="shopping-done">0</strong><span>coches</span></div>
+            </div>
+            <div class="button-row" style="margin-top: 12px;">
+              <button class="secondary" type="button" id="copy-shopping"><i data-lucide="copy"></i>Copier</button>
+              <button class="ghost" type="button" id="download-shopping"><i data-lucide="download"></i>Telecharger</button>
+            </div>
+          </section>
+          <div class="stack" id="shopping-list"></div>
+        </section>
+
+        <section class="section-view" id="view-settings" aria-labelledby="settings-title">
+          <section class="panel">
+            <div class="panel-header">
+              <h2 id="settings-title">Reglages simples</h2>
+            </div>
+            <div class="settings-grid">
+              <div class="setting-card">
+                <h3>Personnes a table</h3>
+                <select id="servings-select" aria-label="Nombre de personnes">
+                  <option value="1">1 personne</option>
+                  <option value="2">2 personnes</option>
+                  <option value="3">3 personnes</option>
+                  <option value="4">4 personnes</option>
+                  <option value="5">5 personnes</option>
+                  <option value="6">6 personnes</option>
+                </select>
+              </div>
+
+              <div class="setting-card">
+                <h3>Taille du texte</h3>
+                <div class="button-row" id="font-list"></div>
+              </div>
+
+              <div class="setting-card">
+                <h3>Jours avec plus de temps</h3>
+                <div class="day-toggle-grid" id="free-days"></div>
+              </div>
+
+              <div class="drive-panel">
+                <h3>Drive Intermarche</h3>
+                <p>Je prepare une liste de mots-cles produit. Pour rester propre legalement, l'ajout au panier se fait ensuite sur le site Intermarche.</p>
+                <div class="drive-list" id="drive-list">Genere une semaine pour preparer la liste Drive.</div>
+                <div class="button-row">
+                  <button class="secondary" type="button" id="copy-drive"><i data-lucide="clipboard-list"></i>Copier liste Drive</button>
+                  <a class="primary" href="https://www.intermarche.com/magasin?pdvref=05669" target="_blank" rel="noopener"><i data-lucide="external-link"></i>Ouvrir Intermarche</a>
+                </div>
+              </div>
+
+              <div class="setting-card">
+                <h3>Autres pages</h3>
+                <div class="button-row">
+                  <a class="ghost" href="atelier-etude.html">Atelier</a>
+                  <a class="ghost" href="cv-lettre.html">CV</a>
+                  <a class="ghost" href="convertisseur-fichiers.html">Convertisseur</a>
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Navigation cuisine">
+    <button class="nav-button active" type="button" data-view="week"><i data-lucide="calendar-days"></i><span>Semaine</span></button>
+    <button class="nav-button" type="button" data-view="recipes"><i data-lucide="book-open"></i><span>Recettes</span></button>
+    <button class="nav-button" type="button" data-view="shopping"><i data-lucide="shopping-basket"></i><span>Courses</span></button>
+    <button class="nav-button" type="button" data-view="settings"><i data-lucide="settings"></i><span>Reglages</span></button>
+  </nav>
+
+  <div class="modal" id="recipe-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <article class="recipe-sheet" id="recipe-sheet"></article>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>
+    const STORAGE_KEY = "mamie-menu-v2";
+    const DRIVE_URL = "https://www.intermarche.com/magasin?pdvref=05669";
+    const days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+    const slots = [
+      ["midi", "Dejeuner"],
+      ["soir", "Diner"]
+    ];
+
+    const modes = [
+      { id: "equilibre", label: "Equilibre", hint: "Varie et simple" },
+      { id: "sportif", label: "Sportif", hint: "Plus de proteines" },
+      { id: "convivial", label: "Fetes", hint: "Repas conviviaux" },
+      { id: "rapide", label: "Rapide", hint: "Moins de 30 min" },
+      { id: "economique", label: "Economique", hint: "Petit budget" },
+      { id: "vegetarien", label: "Vegetarien", hint: "Sans viande" }
+    ];
+
+    const categories = {
+      fruits_legumes: "Fruits et legumes",
+      viandes: "Viandes",
+      frais: "Produits frais",
+      epicerie: "Epicerie",
+      surgeles: "Surgeles"
+    };
+    const categoryOrder = ["fruits_legumes", "viandes", "frais", "epicerie", "surgeles"];
+
+    const ingredientMeta = {
+      riz: meta("Riz", "epicerie", "riz long grain", "#f7e7ba"),
+      riz_arborio: meta("Riz arborio", "epicerie", "riz arborio risotto", "#f5e0a8"),
+      pates: meta("Pates", "epicerie", "pates", "#f6d99c"),
+      pesto: meta("Pesto", "epicerie", "pesto basilic", "#cfe8bf"),
+      tomates_cerises: meta("Tomates cerises", "fruits_legumes", "tomates cerises", "#f5aaa0"),
+      tomate: meta("Tomate", "fruits_legumes", "tomates", "#f39b8c"),
+      sauce_tomate: meta("Sauce tomate", "epicerie", "sauce tomate", "#e97d69"),
+      thon: meta("Thon", "epicerie", "thon boite", "#cad3dc"),
+      avocat: meta("Avocat", "fruits_legumes", "avocat", "#badc8a"),
+      citron: meta("Citron", "fruits_legumes", "citron", "#f7dc68"),
+      oeufs: meta("Oeufs", "frais", "oeufs", "#f7e9c4"),
+      epinards: meta("Epinards", "fruits_legumes", "epinards", "#9fd39d"),
+      feta: meta("Feta", "frais", "feta", "#f4f0de"),
+      tortillas: meta("Tortillas", "epicerie", "tortillas wraps", "#ead6a8"),
+      poulet: meta("Poulet", "viandes", "filet de poulet", "#f1b98f"),
+      poulet_cuit: meta("Poulet cuit", "viandes", "poulet cuit", "#efbd96"),
+      salade: meta("Salade", "fruits_legumes", "salade verte", "#a9d88d"),
+      yaourt: meta("Yaourt", "frais", "yaourt nature", "#f7f5ed"),
+      lentilles: meta("Lentilles", "epicerie", "lentilles cuites", "#baa57c"),
+      chevre: meta("Chevre", "frais", "fromage de chevre", "#f3eedc"),
+      concombre: meta("Concombre", "fruits_legumes", "concombre", "#9ad69c"),
+      noix: meta("Noix", "epicerie", "noix", "#c99f70"),
+      nouilles: meta("Nouilles", "epicerie", "nouilles", "#f1d29a"),
+      legumes_surgeles: meta("Legumes surgeles", "surgeles", "legumes surgeles", "#b7d9d3"),
+      sauce_soja: meta("Sauce soja", "epicerie", "sauce soja", "#9d6748"),
+      haricots_rouges: meta("Haricots rouges", "epicerie", "haricots rouges", "#ad5a4d"),
+      tomates_concassees: meta("Tomates concassees", "epicerie", "tomates concassees", "#e37868"),
+      mais: meta("Mais", "epicerie", "mais boite", "#f3d665"),
+      soupe_tomate: meta("Soupe tomate", "epicerie", "soupe tomate", "#df715e"),
+      pain: meta("Pain", "epicerie", "pain", "#d8aa74"),
+      fromage_rape: meta("Fromage rape", "frais", "fromage rape", "#f3df91"),
+      pois_chiches: meta("Pois chiches", "epicerie", "pois chiches", "#dfc889"),
+      lait_coco: meta("Lait coco", "epicerie", "lait de coco", "#f1eee2"),
+      saumon: meta("Saumon", "viandes", "saumon", "#f2a083"),
+      pommes_de_terre: meta("Pommes de terre", "fruits_legumes", "pommes de terre", "#d8bd86"),
+      haricots_verts: meta("Haricots verts", "surgeles", "haricots verts", "#94ca85"),
+      semoule: meta("Semoule", "epicerie", "semoule", "#ead48f"),
+      courgette: meta("Courgette", "fruits_legumes", "courgettes", "#86be7b"),
+      champignons: meta("Champignons", "fruits_legumes", "champignons", "#d8c5a9"),
+      bouillon: meta("Bouillon", "epicerie", "bouillon cube", "#d9b66f"),
+      parmesan: meta("Parmesan", "frais", "parmesan", "#f0dc9d"),
+      plaques_lasagne: meta("Plaques lasagne", "epicerie", "plaques lasagne", "#e7c987"),
+      ricotta: meta("Ricotta", "frais", "ricotta", "#f4f0e4"),
+      gnocchi: meta("Gnocchi", "frais", "gnocchi", "#ead49f"),
+      mozzarella: meta("Mozzarella", "frais", "mozzarella", "#f5f2e9"),
+      basilic: meta("Basilic", "fruits_legumes", "basilic", "#8ccf83"),
+      pate_brisee: meta("Pate brisee", "frais", "pate brisee", "#ead19b"),
+      creme: meta("Creme", "frais", "creme fraiche", "#f5f0df"),
+      carottes: meta("Carottes", "fruits_legumes", "carottes", "#f0a85d"),
+      oignon: meta("Oignon", "fruits_legumes", "oignons", "#e5c795"),
+      ail: meta("Ail", "fruits_legumes", "ail", "#efe0c4"),
+      poivron: meta("Poivron", "fruits_legumes", "poivrons", "#e76855"),
+      brocoli: meta("Brocoli", "fruits_legumes", "brocoli", "#78bf72"),
+      patate_douce: meta("Patate douce", "fruits_legumes", "patates douces", "#df8d54"),
+      quinoa: meta("Quinoa", "epicerie", "quinoa", "#ead49f"),
+      boulgour: meta("Boulgour", "epicerie", "boulgour", "#d9b76f"),
+      pois_casses: meta("Pois casses", "epicerie", "pois casses", "#b4c77a"),
+      tofu: meta("Tofu", "frais", "tofu", "#f3ead9"),
+      boeuf: meta("Boeuf", "viandes", "boeuf hache", "#c76f62"),
+      jambon: meta("Jambon", "viandes", "jambon", "#eca0a0"),
+      lardons: meta("Lardons", "viandes", "lardons", "#d28a72"),
+      poisson_blanc: meta("Poisson blanc", "viandes", "filet poisson blanc", "#d8edf1"),
+      crevettes: meta("Crevettes", "viandes", "crevettes", "#efa07f"),
+      dinde: meta("Dinde", "viandes", "escalopes de dinde", "#efbd96"),
+      merguez: meta("Merguez", "viandes", "merguez", "#d96b52"),
+      lait: meta("Lait", "frais", "lait", "#f5f1e6"),
+      fromage_blanc: meta("Fromage blanc", "frais", "fromage blanc", "#f6f3e8"),
+      cheddar: meta("Cheddar", "frais", "cheddar", "#f1b75d"),
+      raclette: meta("Fromage raclette", "frais", "fromage raclette", "#f0d17a"),
+      champignons_paris: meta("Champignons de Paris", "fruits_legumes", "champignons de paris", "#d8c5a9"),
+      petits_pois: meta("Petits pois", "surgeles", "petits pois", "#9fd37e"),
+      fruits_rouges: meta("Fruits rouges", "surgeles", "fruits rouges", "#d7748a"),
+      saumon_fume: meta("Saumon fume", "frais", "saumon fume", "#e99575"),
+      pois_gourmands: meta("Pois gourmands", "fruits_legumes", "pois gourmands", "#8fcb83"),
+      couscous: meta("Couscous", "epicerie", "semoule couscous", "#ead48f"),
+      olives: meta("Olives", "epicerie", "olives", "#8b9b61"),
+      feuilles_brick: meta("Feuilles de brick", "frais", "feuilles de brick", "#e8d2a2"),
+      mascarpone: meta("Mascarpone", "frais", "mascarpone", "#f5f0de"),
+      boudoirs: meta("Biscuits boudoirs", "epicerie", "boudoirs", "#e7c98f"),
+      chocolat: meta("Chocolat", "epicerie", "chocolat dessert", "#7b4a34"),
+      banane: meta("Bananes", "fruits_legumes", "bananes", "#f2d75e"),
+      legumes_grilles: meta("Legumes grilles", "surgeles", "legumes grilles surgeles", "#c7d19a")
+    };
+
+    const recipes = [
+      recipe({
+        id: "bol-riz-thon",
+        title: "Bol riz thon avocat",
+        photo: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80",
+        time: 12,
+        difficulty: "Tres facile",
+        servings: 2,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "sportif", "rapide", "economique"],
+        cost: 1,
+        ingredients: [ing("riz", 160, "g"), ing("thon", 1, "boite"), ing("avocat", 1, "piece"), ing("citron", 1, "piece")],
+        steps: ["Cuire le riz ou utiliser un reste deja pret.", "Egoutter le thon et couper l'avocat.", "Assembler dans deux bols avec un filet de citron.", "Ajouter sel, poivre et un peu d'huile si besoin."],
+        nutrition: { calories: 520, protein: 28, carbs: 62, fat: 19 }
+      }),
+      recipe({
+        id: "omelette-epinards",
+        title: "Omelette epinards feta",
+        photo: "https://images.unsplash.com/photo-1510693206972-df098062cb71?auto=format&fit=crop&w=900&q=80",
+        time: 12,
+        difficulty: "Tres facile",
+        servings: 2,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "sportif", "rapide", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("oeufs", 4, "piece"), ing("epinards", 160, "g"), ing("feta", 80, "g")],
+        steps: ["Battre les oeufs dans un bol.", "Faire tomber les epinards deux minutes a la poele.", "Verser les oeufs, ajouter la feta emiettee.", "Cuire doucement jusqu'a ce que l'omelette se tienne."],
+        nutrition: { calories: 410, protein: 29, carbs: 8, fat: 29 }
+      }),
+      recipe({
+        id: "pates-pesto",
+        title: "Pates pesto tomates",
+        photo: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=80",
+        time: 15,
+        difficulty: "Tres facile",
+        servings: 2,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "rapide", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("pates", 180, "g"), ing("pesto", 3, "c. soupe"), ing("tomates_cerises", 160, "g"), ing("parmesan", 30, "g")],
+        steps: ["Cuire les pates dans une grande casserole d'eau salee.", "Couper les tomates cerises en deux.", "Melanger les pates chaudes avec le pesto.", "Ajouter tomates et parmesan juste avant de servir."],
+        nutrition: { calories: 610, protein: 20, carbs: 84, fat: 22 }
+      }),
+      recipe({
+        id: "wrap-poulet",
+        title: "Wrap poulet crudites",
+        photo: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=900&q=80",
+        time: 10,
+        difficulty: "Tres facile",
+        servings: 2,
+        slots: ["midi"],
+        modes: ["equilibre", "sportif", "rapide", "economique"],
+        cost: 1,
+        ingredients: [ing("tortillas", 4, "piece"), ing("poulet_cuit", 220, "g"), ing("salade", 90, "g"), ing("yaourt", 1, "piece"), ing("tomate", 1, "piece")],
+        steps: ["Melanger le yaourt avec sel, poivre et citron si disponible.", "Repartir salade, tomate et poulet dans les tortillas.", "Ajouter la sauce.", "Rouler bien serre et couper en deux."],
+        nutrition: { calories: 470, protein: 34, carbs: 48, fat: 16 }
+      }),
+      recipe({
+        id: "lentilles-chevre",
+        title: "Salade lentilles chevre",
+        photo: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=900&q=80",
+        time: 12,
+        difficulty: "Tres facile",
+        servings: 2,
+        slots: ["midi"],
+        modes: ["equilibre", "rapide", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("lentilles", 360, "g"), ing("chevre", 90, "g"), ing("concombre", 1, "piece"), ing("noix", 30, "g")],
+        steps: ["Rincer les lentilles si elles sont en conserve.", "Couper le concombre en des.", "Ajouter le chevre et les noix.", "Assaisonner avec huile, vinaigre, sel et poivre."],
+        nutrition: { calories: 455, protein: 24, carbs: 46, fat: 19 }
+      }),
+      recipe({
+        id: "nouilles-oeuf",
+        title: "Nouilles sautees oeuf",
+        photo: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=80",
+        time: 18,
+        difficulty: "Facile",
+        servings: 2,
+        slots: ["soir"],
+        modes: ["equilibre", "rapide", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("nouilles", 180, "g"), ing("oeufs", 3, "piece"), ing("legumes_surgeles", 320, "g"), ing("sauce_soja", 2, "c. soupe")],
+        steps: ["Cuire les nouilles selon le paquet.", "Faire revenir les legumes surgeles a la poele.", "Ajouter les nouilles et la sauce soja.", "Pousser le tout sur un cote, brouiller les oeufs, puis melanger."],
+        nutrition: { calories: 560, protein: 24, carbs: 78, fat: 17 }
+      }),
+      recipe({
+        id: "chili-express",
+        title: "Chili express haricots",
+        photo: "https://images.unsplash.com/photo-1625944525533-473f1a3d54e7?auto=format&fit=crop&w=900&q=80",
+        time: 22,
+        difficulty: "Facile",
+        servings: 3,
+        slots: ["soir"],
+        modes: ["equilibre", "rapide", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("haricots_rouges", 1, "boite"), ing("tomates_concassees", 1, "boite"), ing("mais", 1, "boite"), ing("riz", 180, "g")],
+        steps: ["Cuire le riz.", "Faire chauffer haricots, tomates et mais dans une casserole.", "Assaisonner avec paprika, cumin ou epices disponibles.", "Servir le chili sur le riz."],
+        nutrition: { calories: 520, protein: 21, carbs: 92, fat: 8 }
+      }),
+      recipe({
+        id: "soupe-toast",
+        title: "Soupe tomate toast fromage",
+        photo: "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=900&q=80",
+        time: 14,
+        difficulty: "Tres facile",
+        servings: 2,
+        slots: ["soir"],
+        modes: ["rapide", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("soupe_tomate", 1, "brique"), ing("pain", 4, "tranche"), ing("fromage_rape", 90, "g")],
+        steps: ["Chauffer la soupe a feu doux.", "Mettre du fromage rape sur le pain.", "Passer les toasts au four ou a la poele couverte.", "Servir avec la soupe bien chaude."],
+        nutrition: { calories: 430, protein: 18, carbs: 54, fat: 16 }
+      }),
+      recipe({
+        id: "curry-pois-chiches",
+        title: "Curry pois chiches",
+        photo: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80",
+        time: 25,
+        difficulty: "Facile",
+        servings: 3,
+        slots: ["soir"],
+        modes: ["equilibre", "rapide", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("pois_chiches", 1, "boite"), ing("lait_coco", 250, "ml"), ing("riz", 220, "g"), ing("epinards", 160, "g")],
+        steps: ["Cuire le riz.", "Chauffer les pois chiches avec le lait coco.", "Ajouter curry, sel et poivre.", "Finir avec les epinards deux minutes avant de servir."],
+        nutrition: { calories: 590, protein: 19, carbs: 82, fat: 22 }
+      }),
+      recipe({
+        id: "saumon-four",
+        title: "Saumon four patates",
+        photo: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=900&q=80",
+        time: 30,
+        difficulty: "Facile",
+        servings: 2,
+        slots: ["soir"],
+        modes: ["equilibre", "sportif", "rapide"],
+        cost: 3,
+        ingredients: [ing("saumon", 2, "pave"), ing("pommes_de_terre", 500, "g"), ing("haricots_verts", 320, "g"), ing("citron", 1, "piece")],
+        steps: ["Couper les pommes de terre en petits morceaux.", "Les enfourner avec un filet d'huile pendant 15 minutes.", "Ajouter le saumon et les haricots verts.", "Cuire encore 12 a 15 minutes et servir avec citron."],
+        nutrition: { calories: 650, protein: 42, carbs: 58, fat: 28 }
+      }),
+      recipe({
+        id: "poulet-citron",
+        title: "Poulet citron semoule",
+        photo: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=900&q=80",
+        time: 28,
+        difficulty: "Facile",
+        servings: 2,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "sportif", "rapide", "economique"],
+        cost: 2,
+        ingredients: [ing("poulet", 300, "g"), ing("semoule", 180, "g"), ing("courgette", 2, "piece"), ing("citron", 1, "piece")],
+        steps: ["Faire dorer le poulet en morceaux.", "Ajouter les courgettes coupees et le citron.", "Preparer la semoule avec de l'eau chaude salee.", "Servir le poulet sur la semoule."],
+        nutrition: { calories: 560, protein: 46, carbs: 56, fat: 15 }
+      }),
+      recipe({
+        id: "tacos-haricots",
+        title: "Tacos haricots avocat",
+        photo: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=900&q=80",
+        time: 25,
+        difficulty: "Facile",
+        servings: 2,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "rapide", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("tortillas", 4, "piece"), ing("haricots_rouges", 1, "boite"), ing("avocat", 1, "piece"), ing("tomate", 2, "piece")],
+        steps: ["Chauffer les haricots rouges avec epices.", "Couper avocat et tomate.", "Garnir les tortillas.", "Replier et servir chaud ou tiede."],
+        nutrition: { calories: 540, protein: 19, carbs: 72, fat: 20 }
+      }),
+      recipe({
+        id: "risotto-champignons",
+        title: "Risotto champignons",
+        photo: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?auto=format&fit=crop&w=900&q=80",
+        time: 38,
+        difficulty: "Moyen",
+        servings: 3,
+        slots: ["soir"],
+        modes: ["equilibre", "convivial", "vegetarien"],
+        cost: 2,
+        ingredients: [ing("riz_arborio", 240, "g"), ing("champignons", 350, "g"), ing("bouillon", 700, "ml"), ing("parmesan", 60, "g")],
+        steps: ["Faire revenir les champignons.", "Ajouter le riz arborio et nacrer une minute.", "Ajouter le bouillon petit a petit en remuant.", "Finir avec parmesan et poivre."],
+        nutrition: { calories: 610, protein: 20, carbs: 86, fat: 20 }
+      }),
+      recipe({
+        id: "lasagnes-epinards",
+        title: "Lasagnes epinards ricotta",
+        photo: "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?auto=format&fit=crop&w=900&q=80",
+        time: 45,
+        difficulty: "Moyen",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["convivial", "vegetarien"],
+        cost: 2,
+        ingredients: [ing("plaques_lasagne", 8, "piece"), ing("epinards", 450, "g"), ing("ricotta", 250, "g"), ing("sauce_tomate", 400, "g")],
+        steps: ["Melanger ricotta et epinards.", "Alterner sauce tomate, plaques et farce.", "Finir par une couche de sauce.", "Cuire 35 minutes au four."],
+        nutrition: { calories: 620, protein: 29, carbs: 70, fat: 24 }
+      }),
+      recipe({
+        id: "gnocchi-gratines",
+        title: "Gnocchi gratines tomate",
+        photo: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=900&q=80",
+        time: 35,
+        difficulty: "Facile",
+        servings: 3,
+        slots: ["soir"],
+        modes: ["equilibre", "convivial", "vegetarien"],
+        cost: 2,
+        ingredients: [ing("gnocchi", 500, "g"), ing("sauce_tomate", 350, "g"), ing("mozzarella", 180, "g"), ing("basilic", 1, "bouquet")],
+        steps: ["Mettre les gnocchi dans un plat.", "Ajouter la sauce tomate.", "Couvrir de mozzarella.", "Gratiner au four jusqu'a ce que le dessus soit dore."],
+        nutrition: { calories: 660, protein: 26, carbs: 92, fat: 21 }
+      }),
+      recipe({
+        id: "quiche-legumes",
+        title: "Quiche legumes rapide",
+        photo: "https://images.unsplash.com/photo-1600326145552-327f74b9c189?auto=format&fit=crop&w=900&q=80",
+        time: 40,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "convivial", "vegetarien", "economique"],
+        cost: 2,
+        ingredients: [ing("pate_brisee", 1, "piece"), ing("oeufs", 4, "piece"), ing("creme", 180, "ml"), ing("legumes_grilles", 350, "g")],
+        steps: ["Etaler la pate dans un moule.", "Battre oeufs et creme.", "Ajouter les legumes grilles.", "Cuire 35 a 40 minutes au four."],
+        nutrition: { calories: 590, protein: 18, carbs: 42, fat: 38 }
+      }),
+      recipe({
+        id: "quinoa-poulet-croquant",
+        title: "Quinoa poulet croquant",
+        photo: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
+        time: 22,
+        difficulty: "Facile",
+        servings: 2,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "sportif", "rapide"],
+        cost: 2,
+        ingredients: [ing("quinoa", 180, "g"), ing("poulet", 260, "g"), ing("concombre", 1, "piece"), ing("tomates_cerises", 160, "g"), ing("citron", 1, "piece")],
+        steps: ["Cuire le quinoa et le laisser tiedir.", "Faire dorer le poulet en petits morceaux.", "Couper concombre et tomates.", "Assembler avec citron, sel, poivre et un filet d'huile."],
+        nutrition: { calories: 545, protein: 43, carbs: 58, fat: 15 }
+      }),
+      recipe({
+        id: "quinoa-legumes-feta",
+        title: "Quinoa legumes feta",
+        photo: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&w=900&q=80",
+        time: 24,
+        difficulty: "Facile",
+        servings: 2,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "rapide", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("quinoa", 180, "g"), ing("poivron", 2, "piece"), ing("courgette", 1, "piece"), ing("feta", 90, "g")],
+        steps: ["Cuire le quinoa.", "Poeler poivron et courgette en des.", "Melanger avec la feta emiettee.", "Assaisonner simplement avec citron ou vinaigre."],
+        nutrition: { calories: 510, protein: 21, carbs: 64, fat: 18 }
+      }),
+      recipe({
+        id: "soupe-carotte-pois-casses",
+        title: "Soupe carotte pois casses",
+        photo: "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?auto=format&fit=crop&w=900&q=80",
+        time: 35,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["equilibre", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("carottes", 600, "g"), ing("pois_casses", 220, "g"), ing("oignon", 1, "piece"), ing("bouillon", 800, "ml")],
+        steps: ["Couper carottes et oignon.", "Mettre avec pois casses et bouillon dans une casserole.", "Cuire jusqu'a ce que tout soit tendre.", "Mixer et rectifier l'assaisonnement."],
+        nutrition: { calories: 390, protein: 19, carbs: 64, fat: 6 }
+      }),
+      recipe({
+        id: "gratin-brocoli-jambon",
+        title: "Gratin brocoli jambon",
+        photo: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=80",
+        time: 32,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["equilibre", "convivial", "economique"],
+        cost: 2,
+        ingredients: [ing("brocoli", 500, "g"), ing("jambon", 4, "tranche"), ing("creme", 180, "ml"), ing("fromage_rape", 120, "g"), ing("pommes_de_terre", 450, "g")],
+        steps: ["Cuire brocoli et pommes de terre en morceaux.", "Mettre dans un plat avec le jambon coupe.", "Ajouter creme et fromage.", "Gratiner au four jusqu'a coloration."],
+        nutrition: { calories: 560, protein: 29, carbs: 48, fat: 27 }
+      }),
+      recipe({
+        id: "hachis-boeuf-patate-douce",
+        title: "Hachis boeuf patate douce",
+        photo: "https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=900&q=80",
+        time: 45,
+        difficulty: "Moyen",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["equilibre", "sportif", "convivial"],
+        cost: 2,
+        ingredients: [ing("boeuf", 450, "g"), ing("patate_douce", 700, "g"), ing("oignon", 1, "piece"), ing("fromage_rape", 80, "g")],
+        steps: ["Cuire les patates douces puis les ecraser.", "Faire revenir boeuf et oignon.", "Mettre la viande dans un plat puis couvrir de puree.", "Ajouter fromage et gratiner."],
+        nutrition: { calories: 640, protein: 38, carbs: 62, fat: 26 }
+      }),
+      recipe({
+        id: "dinde-curry-poivron",
+        title: "Dinde curry poivron",
+        photo: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80",
+        time: 26,
+        difficulty: "Facile",
+        servings: 2,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "sportif", "rapide", "economique"],
+        cost: 2,
+        ingredients: [ing("dinde", 280, "g"), ing("poivron", 2, "piece"), ing("lait_coco", 180, "ml"), ing("riz", 180, "g")],
+        steps: ["Cuire le riz.", "Faire revenir la dinde en lamelles.", "Ajouter poivrons et curry.", "Verser le lait coco et laisser mijoter 8 minutes."],
+        nutrition: { calories: 585, protein: 43, carbs: 66, fat: 17 }
+      }),
+      recipe({
+        id: "poisson-citron-brocoli",
+        title: "Poisson citron brocoli",
+        photo: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=900&q=80",
+        time: 24,
+        difficulty: "Facile",
+        servings: 2,
+        slots: ["soir"],
+        modes: ["equilibre", "sportif", "rapide"],
+        cost: 2,
+        ingredients: [ing("poisson_blanc", 2, "filet"), ing("brocoli", 420, "g"), ing("pommes_de_terre", 360, "g"), ing("citron", 1, "piece")],
+        steps: ["Cuire pommes de terre et brocoli vapeur ou a l'eau.", "Poeler le poisson avec citron.", "Saler, poivrer.", "Servir avec un filet d'huile d'olive."],
+        nutrition: { calories: 480, protein: 39, carbs: 48, fat: 14 }
+      }),
+      recipe({
+        id: "wok-crevettes-nouilles",
+        title: "Wok crevettes nouilles",
+        photo: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=900&q=80",
+        time: 20,
+        difficulty: "Facile",
+        servings: 3,
+        slots: ["soir"],
+        modes: ["equilibre", "sportif", "rapide", "convivial"],
+        cost: 2,
+        ingredients: [ing("crevettes", 300, "g"), ing("nouilles", 240, "g"), ing("pois_gourmands", 220, "g"), ing("sauce_soja", 3, "c. soupe")],
+        steps: ["Cuire les nouilles.", "Saisir les crevettes et pois gourmands.", "Ajouter nouilles et sauce soja.", "Melanger deux minutes a feu vif."],
+        nutrition: { calories: 560, protein: 35, carbs: 74, fat: 13 }
+      }),
+      recipe({
+        id: "tofu-brocoli-soja",
+        title: "Tofu brocoli soja",
+        photo: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
+        time: 22,
+        difficulty: "Facile",
+        servings: 2,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "rapide", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("tofu", 250, "g"), ing("brocoli", 420, "g"), ing("riz", 180, "g"), ing("sauce_soja", 2, "c. soupe")],
+        steps: ["Cuire le riz.", "Dorer le tofu en cubes.", "Ajouter brocoli cuit et sauce soja.", "Servir le tout ensemble."],
+        nutrition: { calories: 520, protein: 28, carbs: 66, fat: 16 }
+      }),
+      recipe({
+        id: "croque-salade",
+        title: "Croque salade",
+        photo: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=900&q=80",
+        time: 15,
+        difficulty: "Tres facile",
+        servings: 2,
+        slots: ["midi", "soir"],
+        modes: ["rapide", "economique", "convivial"],
+        cost: 1,
+        ingredients: [ing("pain", 6, "tranche"), ing("jambon", 3, "tranche"), ing("fromage_rape", 120, "g"), ing("salade", 100, "g")],
+        steps: ["Garnir le pain avec jambon et fromage.", "Cuire a la poele ou au four.", "Preparer une salade simple.", "Servir chaud."],
+        nutrition: { calories: 570, protein: 31, carbs: 54, fat: 25 }
+      }),
+      recipe({
+        id: "couscous-merguez-express",
+        title: "Couscous merguez express",
+        photo: "https://images.unsplash.com/photo-1541518763669-27fef04b14ea?auto=format&fit=crop&w=900&q=80",
+        time: 34,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["convivial", "economique"],
+        cost: 2,
+        ingredients: [ing("merguez", 6, "piece"), ing("couscous", 320, "g"), ing("carottes", 500, "g"), ing("pois_chiches", 1, "boite"), ing("courgette", 2, "piece")],
+        steps: ["Cuire les merguez a la poele.", "Faire mijoter carottes, courgettes et pois chiches avec epices.", "Preparer la semoule.", "Servir tout ensemble dans un grand plat."],
+        nutrition: { calories: 720, protein: 31, carbs: 82, fat: 30 }
+      }),
+      recipe({
+        id: "salade-pates-saumon",
+        title: "Salade pates saumon fume",
+        photo: "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?auto=format&fit=crop&w=900&q=80",
+        time: 18,
+        difficulty: "Tres facile",
+        servings: 3,
+        slots: ["midi"],
+        modes: ["equilibre", "sportif", "rapide", "convivial"],
+        cost: 3,
+        ingredients: [ing("pates", 260, "g"), ing("saumon_fume", 160, "g"), ing("concombre", 1, "piece"), ing("fromage_blanc", 160, "g"), ing("citron", 1, "piece")],
+        steps: ["Cuire les pates puis les refroidir.", "Couper concombre et saumon.", "Melanger fromage blanc, citron, sel et poivre.", "Assembler la salade."],
+        nutrition: { calories: 545, protein: 30, carbs: 68, fat: 16 }
+      }),
+      recipe({
+        id: "bricks-thon-oeuf",
+        title: "Bricks thon oeuf",
+        photo: "https://images.unsplash.com/photo-1604909052743-94e838986d24?auto=format&fit=crop&w=900&q=80",
+        time: 28,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["midi", "soir"],
+        modes: ["rapide", "economique", "convivial"],
+        cost: 1,
+        ingredients: [ing("feuilles_brick", 8, "piece"), ing("thon", 2, "boite"), ing("oeufs", 4, "piece"), ing("salade", 120, "g")],
+        steps: ["Melanger thon et oeufs durs haches.", "Garnir les feuilles de brick.", "Cuire a la poele avec peu d'huile.", "Servir avec salade."],
+        nutrition: { calories: 520, protein: 32, carbs: 42, fat: 23 }
+      }),
+      recipe({
+        id: "risotto-crevettes-petits-pois",
+        title: "Risotto crevettes petits pois",
+        photo: "https://images.unsplash.com/photo-1476124369491-e7addf5db371?auto=format&fit=crop&w=900&q=80",
+        time: 40,
+        difficulty: "Moyen",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["equilibre", "sportif", "convivial"],
+        cost: 3,
+        ingredients: [ing("riz_arborio", 320, "g"), ing("crevettes", 350, "g"), ing("petits_pois", 220, "g"), ing("bouillon", 900, "ml"), ing("parmesan", 60, "g")],
+        steps: ["Nacrer le riz dans une casserole.", "Ajouter le bouillon petit a petit.", "Ajouter petits pois et crevettes en fin de cuisson.", "Finir avec parmesan."],
+        nutrition: { calories: 650, protein: 35, carbs: 86, fat: 17 }
+      }),
+      recipe({
+        id: "fajitas-boeuf-poivron",
+        title: "Fajitas boeuf poivron",
+        photo: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=900&q=80",
+        time: 25,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["midi", "soir"],
+        modes: ["sportif", "rapide", "convivial"],
+        cost: 2,
+        ingredients: [ing("tortillas", 8, "piece"), ing("boeuf", 450, "g"), ing("poivron", 3, "piece"), ing("oignon", 1, "piece"), ing("yaourt", 2, "piece")],
+        steps: ["Poeler boeuf, oignon et poivrons avec epices.", "Chauffer les tortillas.", "Mettre le tout sur la table.", "Chacun garnit sa fajita avec une cuillere de yaourt."],
+        nutrition: { calories: 660, protein: 39, carbs: 58, fat: 29 }
+      }),
+      recipe({
+        id: "parmentier-lentilles",
+        title: "Parmentier lentilles",
+        photo: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80",
+        time: 42,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["equilibre", "convivial", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("lentilles", 500, "g"), ing("pommes_de_terre", 800, "g"), ing("carottes", 350, "g"), ing("oignon", 1, "piece"), ing("fromage_rape", 100, "g")],
+        steps: ["Faire une puree de pommes de terre.", "Rechauffer lentilles, carottes et oignon.", "Mettre les lentilles dans un plat.", "Couvrir de puree, fromage, puis gratiner."],
+        nutrition: { calories: 560, protein: 23, carbs: 82, fat: 14 }
+      }),
+      recipe({
+        id: "poelee-raclette-pommes",
+        title: "Poelee raclette pommes de terre",
+        photo: "https://images.unsplash.com/photo-1600891963935-9e88a14f7564?auto=format&fit=crop&w=900&q=80",
+        time: 30,
+        difficulty: "Tres facile",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["convivial", "economique"],
+        cost: 2,
+        ingredients: [ing("pommes_de_terre", 900, "g"), ing("raclette", 250, "g"), ing("jambon", 4, "tranche"), ing("salade", 120, "g")],
+        steps: ["Cuire les pommes de terre en rondelles.", "Les faire dorer a la poele.", "Ajouter jambon et fromage raclette.", "Couvrir jusqu'a ce que le fromage fonde."],
+        nutrition: { calories: 710, protein: 32, carbs: 62, fat: 36 }
+      }),
+      recipe({
+        id: "quiche-saumon-epinards",
+        title: "Quiche saumon epinards",
+        photo: "https://images.unsplash.com/photo-1600326145359-3a44909d1a39?auto=format&fit=crop&w=900&q=80",
+        time: 42,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "sportif", "convivial"],
+        cost: 3,
+        ingredients: [ing("pate_brisee", 1, "piece"), ing("saumon_fume", 180, "g"), ing("epinards", 350, "g"), ing("oeufs", 4, "piece"), ing("creme", 180, "ml")],
+        steps: ["Etaler la pate.", "Repartir epinards et saumon.", "Verser oeufs battus avec creme.", "Cuire 35 minutes au four."],
+        nutrition: { calories: 640, protein: 30, carbs: 34, fat: 42 }
+      }),
+      recipe({
+        id: "chili-boeuf-famille",
+        title: "Chili boeuf famille",
+        photo: "https://images.unsplash.com/photo-1625944525533-473f1a3d54e7?auto=format&fit=crop&w=900&q=80",
+        time: 35,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["sportif", "convivial", "economique"],
+        cost: 2,
+        ingredients: [ing("boeuf", 450, "g"), ing("haricots_rouges", 2, "boite"), ing("tomates_concassees", 1, "boite"), ing("mais", 1, "boite"), ing("riz", 260, "g")],
+        steps: ["Cuire le riz.", "Faire revenir le boeuf.", "Ajouter haricots, tomates et mais.", "Laisser mijoter 20 minutes."],
+        nutrition: { calories: 680, protein: 42, carbs: 86, fat: 19 }
+      }),
+      recipe({
+        id: "taboule-pois-chiches",
+        title: "Taboule pois chiches",
+        photo: "https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=900&q=80",
+        time: 15,
+        difficulty: "Tres facile",
+        servings: 3,
+        slots: ["midi"],
+        modes: ["equilibre", "rapide", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("couscous", 220, "g"), ing("pois_chiches", 1, "boite"), ing("concombre", 1, "piece"), ing("tomate", 3, "piece"), ing("citron", 1, "piece")],
+        steps: ["Gonfler la semoule avec de l'eau chaude.", "Couper tomates et concombre.", "Ajouter pois chiches et citron.", "Melanger et garder au frais si possible."],
+        nutrition: { calories: 480, protein: 18, carbs: 78, fat: 10 }
+      }),
+      recipe({
+        id: "brochettes-poulet-boulgour",
+        title: "Brochettes poulet boulgour",
+        photo: "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=900&q=80",
+        time: 32,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["equilibre", "sportif", "convivial"],
+        cost: 2,
+        ingredients: [ing("poulet", 600, "g"), ing("boulgour", 300, "g"), ing("poivron", 3, "piece"), ing("yaourt", 2, "piece"), ing("citron", 1, "piece")],
+        steps: ["Couper poulet et poivrons.", "Cuire a la poele ou au four comme des brochettes.", "Preparer le boulgour.", "Servir avec sauce yaourt citron."],
+        nutrition: { calories: 620, protein: 48, carbs: 62, fat: 19 }
+      }),
+      recipe({
+        id: "gnocchi-lardons-champignons",
+        title: "Gnocchi lardons champignons",
+        photo: "https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=900&q=80",
+        time: 22,
+        difficulty: "Tres facile",
+        servings: 3,
+        slots: ["soir"],
+        modes: ["rapide", "economique", "convivial"],
+        cost: 2,
+        ingredients: [ing("gnocchi", 500, "g"), ing("lardons", 180, "g"), ing("champignons_paris", 250, "g"), ing("creme", 160, "ml")],
+        steps: ["Dorer les lardons.", "Ajouter les champignons.", "Poeler les gnocchi.", "Ajouter creme et melanger deux minutes."],
+        nutrition: { calories: 690, protein: 24, carbs: 82, fat: 30 }
+      }),
+      recipe({
+        id: "ramen-poulet-express",
+        title: "Ramen poulet express",
+        photo: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=900&q=80",
+        time: 20,
+        difficulty: "Facile",
+        servings: 2,
+        slots: ["soir"],
+        modes: ["equilibre", "sportif", "rapide", "economique"],
+        cost: 1,
+        ingredients: [ing("nouilles", 180, "g"), ing("poulet_cuit", 220, "g"), ing("oeufs", 2, "piece"), ing("bouillon", 700, "ml"), ing("epinards", 120, "g")],
+        steps: ["Chauffer le bouillon.", "Ajouter nouilles et epinards.", "Ajouter poulet cuit.", "Servir avec un oeuf mollet ou dur."],
+        nutrition: { calories: 560, protein: 38, carbs: 66, fat: 16 }
+      }),
+      recipe({
+        id: "salade-avocat-crevettes",
+        title: "Salade avocat crevettes",
+        photo: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&w=900&q=80",
+        time: 12,
+        difficulty: "Tres facile",
+        servings: 2,
+        slots: ["midi"],
+        modes: ["equilibre", "sportif", "rapide"],
+        cost: 3,
+        ingredients: [ing("crevettes", 240, "g"), ing("avocat", 2, "piece"), ing("salade", 120, "g"), ing("tomates_cerises", 160, "g"), ing("citron", 1, "piece")],
+        steps: ["Rincer la salade.", "Couper avocat et tomates.", "Ajouter les crevettes.", "Assaisonner avec citron, sel, poivre."],
+        nutrition: { calories: 430, protein: 31, carbs: 18, fat: 27 }
+      }),
+      recipe({
+        id: "omelette-pommes-terre",
+        title: "Omelette pommes de terre",
+        photo: "https://images.unsplash.com/photo-1510693206972-df098062cb71?auto=format&fit=crop&w=900&q=80",
+        time: 25,
+        difficulty: "Tres facile",
+        servings: 3,
+        slots: ["midi", "soir"],
+        modes: ["rapide", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("oeufs", 6, "piece"), ing("pommes_de_terre", 500, "g"), ing("oignon", 1, "piece"), ing("salade", 100, "g")],
+        steps: ["Couper les pommes de terre en petits cubes.", "Les faire dorer avec l'oignon.", "Verser les oeufs battus.", "Servir avec salade."],
+        nutrition: { calories: 520, protein: 24, carbs: 48, fat: 25 }
+      }),
+      recipe({
+        id: "tacos-poulet-poivron",
+        title: "Tacos poulet poivron",
+        photo: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?auto=format&fit=crop&w=900&q=80",
+        time: 24,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["midi", "soir"],
+        modes: ["sportif", "rapide", "convivial", "economique"],
+        cost: 2,
+        ingredients: [ing("tortillas", 8, "piece"), ing("poulet", 520, "g"), ing("poivron", 3, "piece"), ing("cheddar", 120, "g"), ing("salade", 100, "g")],
+        steps: ["Faire revenir poulet et poivrons.", "Chauffer les tortillas.", "Ajouter cheddar et salade.", "Servir a table pour que chacun garnisse."],
+        nutrition: { calories: 620, protein: 45, carbs: 52, fat: 24 }
+      }),
+      recipe({
+        id: "pates-carbonara-simple",
+        title: "Pates carbonara simple",
+        photo: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=80",
+        time: 18,
+        difficulty: "Tres facile",
+        servings: 3,
+        slots: ["soir"],
+        modes: ["rapide", "economique", "convivial"],
+        cost: 1,
+        ingredients: [ing("pates", 300, "g"), ing("lardons", 180, "g"), ing("oeufs", 3, "piece"), ing("parmesan", 50, "g")],
+        steps: ["Cuire les pates.", "Dorer les lardons.", "Melanger oeufs et parmesan hors du feu.", "Ajouter les pates chaudes et melanger vite."],
+        nutrition: { calories: 720, protein: 31, carbs: 82, fat: 30 }
+      }),
+      recipe({
+        id: "curry-patate-douce-lentilles",
+        title: "Curry patate douce lentilles",
+        photo: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80",
+        time: 32,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["equilibre", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("patate_douce", 650, "g"), ing("lentilles", 420, "g"), ing("lait_coco", 250, "ml"), ing("epinards", 180, "g")],
+        steps: ["Cuire la patate douce en cubes.", "Ajouter lentilles et lait coco.", "Assaisonner avec curry.", "Ajouter les epinards a la fin."],
+        nutrition: { calories: 610, protein: 22, carbs: 86, fat: 20 }
+      }),
+      recipe({
+        id: "tartines-chevre-noix",
+        title: "Tartines chevre noix",
+        photo: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=900&q=80",
+        time: 12,
+        difficulty: "Tres facile",
+        servings: 2,
+        slots: ["midi"],
+        modes: ["rapide", "economique", "vegetarien", "convivial"],
+        cost: 1,
+        ingredients: [ing("pain", 4, "tranche"), ing("chevre", 120, "g"), ing("noix", 30, "g"), ing("salade", 120, "g")],
+        steps: ["Mettre le chevre sur le pain.", "Ajouter les noix.", "Passer au four quelques minutes.", "Servir avec salade."],
+        nutrition: { calories: 520, protein: 20, carbs: 46, fat: 29 }
+      }),
+      recipe({
+        id: "lasagnes-boeuf-express",
+        title: "Lasagnes boeuf express",
+        photo: "https://images.unsplash.com/photo-1574894709920-11b28e7367e3?auto=format&fit=crop&w=900&q=80",
+        time: 48,
+        difficulty: "Moyen",
+        servings: 5,
+        slots: ["soir"],
+        modes: ["convivial"],
+        cost: 2,
+        ingredients: [ing("plaques_lasagne", 10, "piece"), ing("boeuf", 550, "g"), ing("sauce_tomate", 600, "g"), ing("fromage_rape", 160, "g"), ing("oignon", 1, "piece")],
+        steps: ["Faire revenir boeuf et oignon.", "Ajouter la sauce tomate.", "Alterner sauce et plaques dans un plat.", "Couvrir de fromage et cuire au four."],
+        nutrition: { calories: 720, protein: 39, carbs: 70, fat: 31 }
+      }),
+      recipe({
+        id: "poisson-tomate-olives",
+        title: "Poisson tomate olives",
+        photo: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=900&q=80",
+        time: 28,
+        difficulty: "Facile",
+        servings: 3,
+        slots: ["soir"],
+        modes: ["equilibre", "sportif", "rapide", "convivial"],
+        cost: 2,
+        ingredients: [ing("poisson_blanc", 3, "filet"), ing("tomates_concassees", 1, "boite"), ing("olives", 80, "g"), ing("riz", 240, "g")],
+        steps: ["Cuire le riz.", "Faire mijoter tomate et olives.", "Ajouter le poisson dans la sauce.", "Couvrir 8 a 10 minutes jusqu'a cuisson."],
+        nutrition: { calories: 540, protein: 38, carbs: 70, fat: 12 }
+      }),
+      recipe({
+        id: "shakshuka-oeufs",
+        title: "Shakshuka oeufs tomate",
+        photo: "https://images.unsplash.com/photo-1565299507177-b0ac66763828?auto=format&fit=crop&w=900&q=80",
+        time: 24,
+        difficulty: "Facile",
+        servings: 3,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "rapide", "economique", "vegetarien", "convivial"],
+        cost: 1,
+        ingredients: [ing("oeufs", 5, "piece"), ing("tomates_concassees", 1, "boite"), ing("poivron", 2, "piece"), ing("oignon", 1, "piece"), ing("pain", 4, "tranche")],
+        steps: ["Faire revenir oignon et poivron.", "Ajouter les tomates et epices.", "Creuser des petits trous et casser les oeufs.", "Couvrir jusqu'a cuisson des oeufs et servir avec pain."],
+        nutrition: { calories: 430, protein: 23, carbs: 42, fat: 18 }
+      }),
+      recipe({
+        id: "pizza-wrap",
+        title: "Pizza wrap rapide",
+        photo: "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?auto=format&fit=crop&w=900&q=80",
+        time: 16,
+        difficulty: "Tres facile",
+        servings: 2,
+        slots: ["midi", "soir"],
+        modes: ["rapide", "economique", "convivial"],
+        cost: 1,
+        ingredients: [ing("tortillas", 4, "piece"), ing("sauce_tomate", 180, "g"), ing("mozzarella", 160, "g"), ing("jambon", 3, "tranche"), ing("salade", 100, "g")],
+        steps: ["Tartiner les tortillas de sauce tomate.", "Ajouter mozzarella et jambon.", "Passer au four ou a la poele couverte.", "Servir avec salade."],
+        nutrition: { calories: 610, protein: 29, carbs: 58, fat: 29 }
+      }),
+      recipe({
+        id: "pates-thon-tomate",
+        title: "Pates thon tomate",
+        photo: "https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=900&q=80",
+        time: 18,
+        difficulty: "Tres facile",
+        servings: 3,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "sportif", "rapide", "economique"],
+        cost: 1,
+        ingredients: [ing("pates", 300, "g"), ing("thon", 2, "boite"), ing("sauce_tomate", 250, "g"), ing("parmesan", 40, "g")],
+        steps: ["Cuire les pates.", "Chauffer sauce tomate et thon.", "Melanger avec les pates.", "Ajouter parmesan au moment de servir."],
+        nutrition: { calories: 620, protein: 36, carbs: 82, fat: 15 }
+      }),
+      recipe({
+        id: "riz-saute-poulet-petits-pois",
+        title: "Riz saute poulet petits pois",
+        photo: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=900&q=80",
+        time: 22,
+        difficulty: "Facile",
+        servings: 3,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "sportif", "rapide", "economique"],
+        cost: 1,
+        ingredients: [ing("riz", 260, "g"), ing("poulet_cuit", 300, "g"), ing("petits_pois", 220, "g"), ing("oeufs", 2, "piece"), ing("sauce_soja", 2, "c. soupe")],
+        steps: ["Cuire ou reutiliser du riz froid.", "Poeler petits pois et poulet.", "Ajouter le riz et la sauce soja.", "Incorporer les oeufs brouilles."],
+        nutrition: { calories: 610, protein: 39, carbs: 78, fat: 16 }
+      }),
+      recipe({
+        id: "dhal-epinards",
+        title: "Dhal lentilles epinards",
+        photo: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=900&q=80",
+        time: 30,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["equilibre", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("lentilles", 450, "g"), ing("lait_coco", 250, "ml"), ing("epinards", 220, "g"), ing("riz", 260, "g"), ing("oignon", 1, "piece")],
+        steps: ["Cuire le riz.", "Faire revenir l'oignon.", "Ajouter lentilles, lait coco et epices.", "Terminer avec les epinards."],
+        nutrition: { calories: 590, protein: 24, carbs: 88, fat: 16 }
+      }),
+      recipe({
+        id: "bowl-patate-douce-pois-chiches",
+        title: "Bowl patate douce pois chiches",
+        photo: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
+        time: 34,
+        difficulty: "Facile",
+        servings: 3,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("patate_douce", 650, "g"), ing("pois_chiches", 1, "boite"), ing("salade", 120, "g"), ing("yaourt", 2, "piece"), ing("citron", 1, "piece")],
+        steps: ["Cuire les patates douces en cubes au four.", "Ajouter pois chiches les 10 dernieres minutes.", "Preparer une sauce yaourt citron.", "Servir sur salade."],
+        nutrition: { calories: 540, protein: 19, carbs: 82, fat: 15 }
+      }),
+      recipe({
+        id: "burger-maison",
+        title: "Burgers maison",
+        photo: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=900&q=80",
+        time: 28,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["convivial", "sportif", "rapide"],
+        cost: 2,
+        ingredients: [ing("pain", 8, "tranche"), ing("boeuf", 500, "g"), ing("cheddar", 160, "g"), ing("salade", 120, "g"), ing("tomate", 2, "piece"), ing("oignon", 1, "piece")],
+        steps: ["Former des steaks avec le boeuf.", "Cuire les steaks et faire fondre le cheddar.", "Preparer salade, tomate et oignon.", "Assembler les burgers a table."],
+        nutrition: { calories: 690, protein: 42, carbs: 48, fat: 36 }
+      }),
+      recipe({
+        id: "gratin-riz-courgette",
+        title: "Gratin riz courgette",
+        photo: "https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=80",
+        time: 38,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["equilibre", "economique", "vegetarien", "convivial"],
+        cost: 1,
+        ingredients: [ing("riz", 260, "g"), ing("courgette", 3, "piece"), ing("oeufs", 3, "piece"), ing("creme", 160, "ml"), ing("fromage_rape", 120, "g")],
+        steps: ["Cuire le riz.", "Raper ou couper les courgettes.", "Melanger riz, courgettes, oeufs et creme.", "Ajouter fromage et gratiner."],
+        nutrition: { calories: 560, protein: 22, carbs: 68, fat: 22 }
+      }),
+      recipe({
+        id: "salade-quinoa-saumon",
+        title: "Salade quinoa saumon",
+        photo: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&w=900&q=80",
+        time: 18,
+        difficulty: "Tres facile",
+        servings: 2,
+        slots: ["midi"],
+        modes: ["equilibre", "sportif", "rapide"],
+        cost: 3,
+        ingredients: [ing("quinoa", 180, "g"), ing("saumon_fume", 150, "g"), ing("avocat", 1, "piece"), ing("concombre", 1, "piece"), ing("citron", 1, "piece")],
+        steps: ["Cuire le quinoa et le refroidir.", "Couper avocat et concombre.", "Ajouter saumon fume.", "Assaisonner au citron."],
+        nutrition: { calories: 540, protein: 31, carbs: 48, fat: 24 }
+      }),
+      recipe({
+        id: "poelee-dinde-brocoli",
+        title: "Poelee dinde brocoli",
+        photo: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=900&q=80",
+        time: 23,
+        difficulty: "Facile",
+        servings: 2,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "sportif", "rapide", "economique"],
+        cost: 2,
+        ingredients: [ing("dinde", 300, "g"), ing("brocoli", 420, "g"), ing("riz", 180, "g"), ing("ail", 1, "piece")],
+        steps: ["Cuire le riz.", "Faire dorer la dinde avec l'ail.", "Ajouter le brocoli cuit.", "Servir avec le riz."],
+        nutrition: { calories: 520, protein: 45, carbs: 58, fat: 12 }
+      }),
+      recipe({
+        id: "omelette-champignons-fromage",
+        title: "Omelette champignons fromage",
+        photo: "https://images.unsplash.com/photo-1510693206972-df098062cb71?auto=format&fit=crop&w=900&q=80",
+        time: 14,
+        difficulty: "Tres facile",
+        servings: 2,
+        slots: ["midi", "soir"],
+        modes: ["rapide", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("oeufs", 5, "piece"), ing("champignons_paris", 220, "g"), ing("fromage_rape", 80, "g"), ing("salade", 100, "g")],
+        steps: ["Poeler les champignons.", "Battre les oeufs.", "Cuire l'omelette avec fromage.", "Servir avec salade."],
+        nutrition: { calories: 470, protein: 30, carbs: 9, fat: 34 }
+      }),
+      recipe({
+        id: "couscous-vegetarien",
+        title: "Couscous vegetarien",
+        photo: "https://images.unsplash.com/photo-1541518763669-27fef04b14ea?auto=format&fit=crop&w=900&q=80",
+        time: 36,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["equilibre", "economique", "vegetarien", "convivial"],
+        cost: 1,
+        ingredients: [ing("couscous", 320, "g"), ing("pois_chiches", 1, "boite"), ing("carottes", 500, "g"), ing("courgette", 2, "piece"), ing("poivron", 2, "piece")],
+        steps: ["Faire mijoter les legumes avec epices.", "Ajouter pois chiches.", "Preparer la semoule.", "Servir dans un grand plat."],
+        nutrition: { calories: 570, protein: 19, carbs: 98, fat: 11 }
+      }),
+      recipe({
+        id: "wrap-thon-concombre",
+        title: "Wrap thon concombre",
+        photo: "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=900&q=80",
+        time: 8,
+        difficulty: "Tres facile",
+        servings: 2,
+        slots: ["midi"],
+        modes: ["sportif", "rapide", "economique"],
+        cost: 1,
+        ingredients: [ing("tortillas", 4, "piece"), ing("thon", 1, "boite"), ing("concombre", 1, "piece"), ing("fromage_blanc", 120, "g"), ing("salade", 80, "g")],
+        steps: ["Melanger thon et fromage blanc.", "Couper le concombre.", "Garnir les tortillas.", "Rouler et servir frais."],
+        nutrition: { calories: 430, protein: 32, carbs: 42, fat: 13 }
+      }),
+      recipe({
+        id: "poulet-four-carottes",
+        title: "Poulet four carottes",
+        photo: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=900&q=80",
+        time: 42,
+        difficulty: "Facile",
+        servings: 4,
+        slots: ["soir"],
+        modes: ["equilibre", "sportif", "convivial", "economique"],
+        cost: 2,
+        ingredients: [ing("poulet", 650, "g"), ing("carottes", 650, "g"), ing("pommes_de_terre", 700, "g"), ing("oignon", 1, "piece")],
+        steps: ["Couper legumes et pommes de terre.", "Ajouter le poulet en morceaux.", "Assaisonner et mettre au four.", "Cuire jusqu'a ce que tout soit dore."],
+        nutrition: { calories: 640, protein: 48, carbs: 62, fat: 20 }
+      }),
+      recipe({
+        id: "tarte-tomate-mozza",
+        title: "Tarte tomate mozzarella",
+        photo: "https://images.unsplash.com/photo-1600326145359-3a44909d1a39?auto=format&fit=crop&w=900&q=80",
+        time: 35,
+        difficulty: "Tres facile",
+        servings: 4,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "economique", "vegetarien", "convivial"],
+        cost: 1,
+        ingredients: [ing("pate_brisee", 1, "piece"), ing("tomate", 4, "piece"), ing("mozzarella", 180, "g"), ing("basilic", 1, "bouquet")],
+        steps: ["Etaler la pate.", "Ajouter tomates en rondelles.", "Repartir mozzarella.", "Cuire au four et finir avec basilic."],
+        nutrition: { calories: 560, protein: 20, carbs: 44, fat: 34 }
+      }),
+      recipe({
+        id: "riz-crevettes-coco",
+        title: "Riz crevettes coco",
+        photo: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80",
+        time: 24,
+        difficulty: "Facile",
+        servings: 3,
+        slots: ["soir"],
+        modes: ["equilibre", "sportif", "rapide", "convivial"],
+        cost: 3,
+        ingredients: [ing("crevettes", 350, "g"), ing("lait_coco", 220, "ml"), ing("riz", 260, "g"), ing("poivron", 2, "piece")],
+        steps: ["Cuire le riz.", "Poeler poivron et crevettes.", "Ajouter lait coco et curry.", "Servir sur le riz."],
+        nutrition: { calories: 610, protein: 36, carbs: 76, fat: 18 }
+      }),
+      recipe({
+        id: "salade-riz-mais-thon",
+        title: "Salade riz mais thon",
+        photo: "https://images.unsplash.com/photo-1505253716362-afaea1d3d1af?auto=format&fit=crop&w=900&q=80",
+        time: 16,
+        difficulty: "Tres facile",
+        servings: 4,
+        slots: ["midi"],
+        modes: ["equilibre", "sportif", "rapide", "economique"],
+        cost: 1,
+        ingredients: [ing("riz", 320, "g"), ing("thon", 2, "boite"), ing("mais", 1, "boite"), ing("tomate", 3, "piece"), ing("concombre", 1, "piece")],
+        steps: ["Cuire et refroidir le riz.", "Ajouter thon, mais et legumes coupes.", "Assaisonner simplement.", "Garder au frais si possible."],
+        nutrition: { calories: 540, protein: 31, carbs: 78, fat: 10 }
+      }),
+      recipe({
+        id: "galettes-lentilles-carottes",
+        title: "Galettes lentilles carottes",
+        photo: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80",
+        time: 30,
+        difficulty: "Facile",
+        servings: 3,
+        slots: ["midi", "soir"],
+        modes: ["equilibre", "economique", "vegetarien"],
+        cost: 1,
+        ingredients: [ing("lentilles", 420, "g"), ing("carottes", 300, "g"), ing("oeufs", 2, "piece"), ing("salade", 120, "g")],
+        steps: ["Ecraser grossierement les lentilles.", "Ajouter carottes rapees et oeufs.", "Former des galettes.", "Poeler et servir avec salade."],
+        nutrition: { calories: 480, protein: 24, carbs: 62, fat: 15 }
+      })
+    ];
+
+    const defaultState = {
+      mode: "rapide",
+      servings: 4,
+      font: "normal",
+      freeDays: ["Samedi", "Dimanche"],
+      plan: {},
+      checked: {},
+      view: "week",
+      recipeTargetDay: "Lundi",
+      recipeTargetSlot: "midi"
+    };
+    let state = loadState();
+    state.view = "week";
+    let toastTimer = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.body.dataset.font = state.font;
+      if (!hasValidPlan() || hasSameDayDuplicates()) generatePlan(false);
+      bindEvents();
+      renderAll();
+      createIcons();
+    });
+
+    function bindEvents() {
+      document.getElementById("generate-week").addEventListener("click", () => generatePlan(true));
+      document.getElementById("clear-week").addEventListener("click", clearPlan);
+      document.getElementById("open-shopping-shortcut").addEventListener("click", () => switchView("shopping"));
+      document.getElementById("recipe-search").addEventListener("input", renderRecipes);
+      document.getElementById("recipe-target-day").addEventListener("change", event => {
+        state.recipeTargetDay = event.target.value;
+        saveState();
+      });
+      document.getElementById("recipe-target-slot").addEventListener("change", event => {
+        state.recipeTargetSlot = event.target.value;
+        saveState();
+      });
+      document.getElementById("copy-shopping").addEventListener("click", copyShoppingList);
+      document.getElementById("download-shopping").addEventListener("click", downloadShoppingList);
+      document.getElementById("copy-drive").addEventListener("click", copyDriveList);
+      document.getElementById("uncheck-all").addEventListener("click", uncheckAll);
+      document.getElementById("shuffle-today").addEventListener("click", replaceToday);
+      document.getElementById("copy-week").addEventListener("click", copyWeek);
+      document.getElementById("servings-select").addEventListener("change", event => {
+        state.servings = Number(event.target.value);
+        state.checked = {};
+        saveState();
+        renderShoppingList();
+        renderStats();
+        toast("Quantites ajustees.");
+      });
+      document.querySelectorAll(".nav-button").forEach(button => {
+        button.addEventListener("click", () => switchView(button.dataset.view));
+      });
+      document.getElementById("recipe-modal").addEventListener("click", event => {
+        if (event.target.id === "recipe-modal") closeRecipe();
+      });
+      document.addEventListener("keydown", event => {
+        if (event.key === "Escape") closeRecipe();
+      });
+    }
+
+    function renderAll() {
+      renderModes();
+      renderRecipeTargets();
+      renderFontOptions();
+      renderFreeDays();
+      renderWeek();
+      renderToday();
+      renderRecipes();
+      renderShoppingList();
+      renderSettings();
+      renderStats();
+      switchView(state.view || "week", false);
+      document.getElementById("active-mode-label").textContent = `Mode ${modeLabel(state.mode).toLowerCase()}`;
+    }
+
+    function renderModes() {
+      const container = document.getElementById("mode-list");
+      container.innerHTML = modes.map(mode => `
+        <label class="mode-chip" title="${escapeAttribute(mode.hint)}">
+          <input type="radio" name="mode" value="${mode.id}" ${state.mode === mode.id ? "checked" : ""}>
+          ${mode.label}
+        </label>
+      `).join("");
+      container.querySelectorAll("input").forEach(input => {
+        input.addEventListener("change", () => {
+          state.mode = input.value;
+          saveState();
+          document.getElementById("active-mode-label").textContent = `Mode ${modeLabel(state.mode).toLowerCase()}`;
+          generatePlan(true);
+        });
+      });
+    }
+
+    function renderRecipeTargets() {
+      state.recipeTargetDay ||= days[0];
+      state.recipeTargetSlot ||= "midi";
+      document.getElementById("recipe-target-day").innerHTML = days.map(day => `<option value="${day}" ${state.recipeTargetDay === day ? "selected" : ""}>${day}</option>`).join("");
+      document.getElementById("recipe-target-slot").value = state.recipeTargetSlot;
+    }
+
+    function renderFontOptions() {
+      const fonts = [
+        ["normal", "Normal"],
+        ["large", "Grand"],
+        ["xlarge", "Tres grand"]
+      ];
+      const container = document.getElementById("font-list");
+      container.innerHTML = fonts.map(([id, label]) => `
+        <label class="font-toggle">
+          <input type="radio" name="font" value="${id}" ${state.font === id ? "checked" : ""}>
+          ${label}
+        </label>
+      `).join("");
+      container.querySelectorAll("input").forEach(input => {
+        input.addEventListener("change", () => {
+          state.font = input.value;
+          document.body.dataset.font = state.font;
+          saveState();
+          toast("Taille du texte changee.");
+        });
+      });
+    }
+
+    function renderFreeDays() {
+      const container = document.getElementById("free-days");
+      container.innerHTML = days.map(day => `
+        <label class="day-toggle">
+          <input type="checkbox" value="${day}" ${state.freeDays.includes(day) ? "checked" : ""}>
+          ${day}
+        </label>
+      `).join("");
+      container.querySelectorAll("input").forEach(input => {
+        input.addEventListener("change", () => {
+          state.freeDays = [...container.querySelectorAll("input:checked")].map(item => item.value);
+          saveState();
+          toast("Jours libres mis a jour.");
+        });
+      });
+    }
+
+    function renderSettings() {
+      document.getElementById("servings-select").value = String(state.servings);
+      document.getElementById("drive-list").innerHTML = driveText().replace(/\n/g, "<br>");
+    }
+
+    function renderWeek() {
+      const container = document.getElementById("week-plan");
+      container.innerHTML = days.map(day => {
+        const filled = slots.filter(([slot]) => state.plan[mealKey(day, slot)]).length;
+        return `
+          <article class="day-card">
+            <div class="day-title">${day}<span>${filled}/2 repas</span></div>
+            ${slots.map(([slot, label]) => renderMeal(day, slot, label)).join("")}
+          </article>
+        `;
+      }).join("");
+      bindMealActions(container);
+      createIcons();
+    }
+
+    function renderToday() {
+      const index = (new Date().getDay() + 6) % 7;
+      const day = days[index] || "Lundi";
+      document.getElementById("today-name").textContent = day;
+      const container = document.getElementById("today-meals");
+      container.innerHTML = slots.map(([slot, label]) => renderMeal(day, slot, label)).join("");
+      bindMealActions(container);
+      createIcons();
+    }
+
+    function renderMeal(day, slot, label) {
+      const id = state.plan[mealKey(day, slot)];
+      const item = recipes.find(recipe => recipe.id === id);
+      if (!item) {
+        return `
+          <div class="meal-card">
+            <div class="meal-photo"></div>
+            <div class="meal-body">
+              <div class="meal-label">${label}</div>
+              <div class="meal-title">Repas a choisir</div>
+              <div class="meal-actions">
+                <button class="tiny-button" type="button" data-replace="${day}|${slot}">Choisir</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      return `
+        <article class="meal-card" data-open-recipe="${item.id}" tabindex="0" role="button" aria-label="Voir ${escapeAttribute(item.title)}">
+          <div class="meal-photo">${imageTag(item.photo, item.title)}</div>
+          <div class="meal-body">
+            <div class="meal-label">${label}</div>
+            <div class="meal-title">${escapeHtml(item.title)}</div>
+            <div class="meal-meta">${item.time} min - ${escapeHtml(item.difficulty)} - ${state.servings} pers.</div>
+            <div class="meal-actions">
+              <button class="tiny-button" type="button" data-replace="${day}|${slot}"><i data-lucide="refresh-cw"></i>Changer</button>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function bindMealActions(root) {
+      root.querySelectorAll("[data-open-recipe]").forEach(card => {
+        card.addEventListener("click", event => {
+          if (event.target.closest("button")) return;
+          openRecipe(card.dataset.openRecipe);
+        });
+        card.addEventListener("keydown", event => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openRecipe(card.dataset.openRecipe);
+          }
+        });
+      });
+      root.querySelectorAll("[data-replace]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.stopPropagation();
+          const [day, slot] = button.dataset.replace.split("|");
+          replaceMeal(day, slot);
+        });
+      });
+    }
+
+    function renderRecipes() {
+      const query = normalize(document.getElementById("recipe-search").value);
+      const visible = recipes.filter(recipe => {
+        const textMatch = !query || normalize(`${recipe.title} ${recipe.difficulty} ${recipe.modes.join(" ")}`).includes(query);
+        return textMatch;
+      });
+      document.getElementById("recipe-grid").innerHTML = visible.map(recipe => `
+        <article class="recipe-card">
+          <div class="recipe-photo">${imageTag(recipe.photo, recipe.title)}</div>
+          <div class="recipe-info">
+            <h3>${escapeHtml(recipe.title)}</h3>
+            <div class="tag-row">
+              <span class="tag orange">${recipe.time} min</span>
+              <span class="tag green">${escapeHtml(recipe.difficulty)}</span>
+              <span class="tag">${recipe.servings} pers.</span>
+            </div>
+            <div class="button-row">
+              <button class="tiny-button" type="button" data-open-recipe="${recipe.id}">Voir</button>
+              <button class="tiny-button" type="button" data-choose-recipe="${recipe.id}"><i data-lucide="plus"></i>Planning</button>
+            </div>
+          </div>
+        </article>
+      `).join("") || `<div class="empty-state">Aucune recette trouvee.</div>`;
+      bindRecipeCards();
+    }
+
+    function bindRecipeCards() {
+      document.querySelectorAll("#recipe-grid [data-choose-recipe]").forEach(button => {
+        button.addEventListener("click", event => {
+          event.stopPropagation();
+          chooseRecipeForTarget(button.dataset.chooseRecipe);
+        });
+      });
+      document.querySelectorAll("#recipe-grid [data-open-recipe]").forEach(element => {
+        element.addEventListener("click", event => {
+          event.stopPropagation();
+          openRecipe(element.dataset.openRecipe);
+        });
+      });
+      createIcons();
+    }
+
+    function chooseRecipeForTarget(recipeId) {
+      const recipe = recipes.find(item => item.id === recipeId);
+      if (!recipe) return;
+      state.recipeTargetDay = document.getElementById("recipe-target-day").value || days[0];
+      state.recipeTargetSlot = document.getElementById("recipe-target-slot").value || "midi";
+      const key = mealKey(state.recipeTargetDay, state.recipeTargetSlot);
+      const otherSlot = state.recipeTargetSlot === "midi" ? "soir" : "midi";
+      if (state.plan[mealKey(state.recipeTargetDay, otherSlot)] === recipe.id) {
+        toast("Ce plat est deja prevu ce jour-la.");
+        return;
+      }
+      state.plan[key] = recipe.id;
+      state.checked = {};
+      saveState();
+      renderWeek();
+      renderToday();
+      renderShoppingList();
+      renderStats();
+      toast(`${recipe.title} ajoute pour ${state.recipeTargetDay}.`);
+    }
+
+    function renderShoppingList() {
+      const list = aggregateShopping();
+      const grouped = groupBy(list, item => item.category);
+      const container = document.getElementById("shopping-list");
+      container.innerHTML = list.length ? categoryOrder.map(category => {
+        const items = grouped[category] || [];
+        if (!items.length) return "";
+        return `
+          <section class="category-block">
+            <div class="category-title">${categories[category]}<span>${items.length}</span></div>
+            ${items.map(renderShoppingItem).join("")}
+          </section>
+        `;
+      }).join("") : `<div class="empty-state">Genere une semaine pour voir les courses.</div>`;
+      container.querySelectorAll(".check-box").forEach(input => {
+        input.addEventListener("change", () => {
+          state.checked[input.dataset.key] = input.checked;
+          saveState();
+          renderShoppingList();
+          renderStats();
+        });
+      });
+      document.getElementById("drive-list").innerHTML = driveText().replace(/\n/g, "<br>");
+      renderStats();
+    }
+
+    function renderShoppingItem(item) {
+      const key = shoppingKey(item);
+      const checked = !!state.checked[key];
+      return `
+        <label class="shopping-card ${checked ? "checked" : ""}">
+          <span class="ingredient-img">${ingredientImage(item)}</span>
+          <span>
+            <span class="shopping-name">${escapeHtml(item.name)}</span>
+            <span class="shopping-qty">${formatQuantity(item.quantity)} ${escapeHtml(item.unit)}</span>
+          </span>
+          <input class="check-box" type="checkbox" data-key="${escapeAttribute(key)}" ${checked ? "checked" : ""} aria-label="${escapeAttribute(item.name)} achete">
+        </label>
+      `;
+    }
+
+    function renderStats() {
+      const meals = Object.values(state.plan).filter(id => recipes.some(recipe => recipe.id === id)).length;
+      const shopping = aggregateShopping();
+      const done = shopping.filter(item => state.checked[shoppingKey(item)]).length;
+      document.getElementById("stat-meals").textContent = meals;
+      document.getElementById("stat-items").textContent = shopping.length;
+      document.getElementById("shopping-total").textContent = shopping.length;
+      document.getElementById("shopping-done").textContent = done;
+    }
+
+    function generatePlan(showMessage) {
+      const ingredientUse = new Map();
+      const usedRecipes = new Map();
+      const nextPlan = {};
+      days.forEach(day => {
+        const dayChosen = new Set();
+        slots.forEach(([slot]) => {
+          const chosen = pickRecipe(day, slot, ingredientUse, usedRecipes, dayChosen);
+          if (!chosen) return;
+          nextPlan[mealKey(day, slot)] = chosen.id;
+          dayChosen.add(chosen.id);
+          usedRecipes.set(chosen.id, (usedRecipes.get(chosen.id) || 0) + 1);
+          chosen.ingredients.forEach(item => ingredientUse.set(item.id, (ingredientUse.get(item.id) || 0) + 1));
+        });
+      });
+      state.plan = nextPlan;
+      state.checked = {};
+      saveState();
+      renderWeek();
+      renderToday();
+      renderRecipes();
+      renderShoppingList();
+      renderStats();
+      if (showMessage) toast("Semaine generee avec les courses optimisees.");
+    }
+
+    function pickRecipe(day, slot, ingredientUse, usedRecipes, excludeIds = new Set()) {
+      const exclusions = excludeIds instanceof Set ? excludeIds : new Set([excludeIds].filter(Boolean));
+      const freshPool = recipes.filter(recipe => recipe.slots.includes(slot) && !exclusions.has(recipe.id) && !usedRecipes.has(recipe.id) && modeAllows(recipe, day));
+      const pool = freshPool.length ? freshPool : recipes.filter(recipe => recipe.slots.includes(slot) && !exclusions.has(recipe.id) && modeAllows(recipe, day));
+      const scored = pool.map(recipe => ({ recipe, score: scoreRecipe(recipe, day, ingredientUse, usedRecipes) }))
+        .sort((a, b) => b.score - a.score);
+      const top = scored.slice(0, 4);
+      return (top[Math.floor(Math.random() * top.length)] || scored[0])?.recipe || null;
+    }
+
+    function scoreRecipe(recipe, day, ingredientUse, usedRecipes) {
+      let score = 0;
+      if (recipe.modes.includes(state.mode)) score += 30;
+      if (state.mode === "rapide" && recipe.time <= 30) score += 30;
+      if (state.mode === "economique" && recipe.cost <= 1) score += 28;
+      if (state.mode === "sportif" && recipe.nutrition.protein >= 28) score += 26;
+      if (state.mode === "vegetarien" && recipe.modes.includes("vegetarien")) score += 32;
+      if (state.mode === "convivial" && recipe.modes.includes("convivial")) score += 48;
+      if (state.mode === "convivial" && recipe.servings >= 4) score += 16;
+      if (state.mode === "convivial" && state.freeDays.includes(day) && recipe.time >= 30) score += 22;
+      if (state.mode === "convivial" && !state.freeDays.includes(day) && recipe.time > 40) score -= 28;
+      if (!state.freeDays.includes(day) && recipe.time > 35) score -= 24;
+      if (state.freeDays.includes(day) && recipe.time >= 30) score += 12;
+      recipe.ingredients.forEach(item => {
+        score += Math.min(ingredientUse.get(item.id) || 0, 2) * 9;
+      });
+      score -= (usedRecipes.get(recipe.id) || 0) * 70;
+      score += Math.random() * 7;
+      return score;
+    }
+
+    function modeAllows(recipe, day) {
+      if (state.mode === "vegetarien" && !recipe.modes.includes("vegetarien")) return false;
+      if (state.mode === "rapide" && recipe.time > 30 && !state.freeDays.includes(day)) return false;
+      if (state.mode === "economique" && recipe.cost > 2) return false;
+      if (state.mode === "convivial") {
+        if (!recipe.modes.includes("convivial")) return false;
+        if (!state.freeDays.includes(day) && recipe.time > 35) return false;
+        return true;
+      }
+      return recipe.modes.includes(state.mode) || state.mode === "equilibre" || state.freeDays.includes(day);
+    }
+
+    function replaceMeal(day, slot) {
+      const key = mealKey(day, slot);
+      const current = state.plan[key];
+      const sameDayOtherMeals = slots
+        .map(([otherSlot]) => state.plan[mealKey(day, otherSlot)])
+        .filter(id => id && id !== current);
+      const excluded = new Set([current, ...sameDayOtherMeals].filter(Boolean));
+      const ingredientUse = new Map();
+      const usedRecipes = new Map();
+      Object.entries(state.plan).forEach(([planKey, id]) => {
+        if (planKey === key) return;
+        const recipe = recipes.find(item => item.id === id);
+        if (!recipe) return;
+        usedRecipes.set(id, (usedRecipes.get(id) || 0) + 1);
+        recipe.ingredients.forEach(item => ingredientUse.set(item.id, (ingredientUse.get(item.id) || 0) + 1));
+      });
+      const next = pickRecipe(day, slot, ingredientUse, usedRecipes, excluded);
+      if (!next) return;
+      state.plan[key] = next.id;
+      state.checked = {};
+      saveState();
+      renderWeek();
+      renderToday();
+      renderShoppingList();
+      renderStats();
+      toast(`${next.title} ajoute.`);
+    }
+
+    function replaceToday() {
+      const day = days[(new Date().getDay() + 6) % 7] || "Lundi";
+      replaceMeal(day, "midi");
+      replaceMeal(day, "soir");
+    }
+
+    function clearPlan() {
+      state.plan = {};
+      state.checked = {};
+      saveState();
+      renderWeek();
+      renderToday();
+      renderShoppingList();
+      renderStats();
+      toast("Planning vide.");
+    }
+
+    function openRecipe(id) {
+      const recipe = recipes.find(item => item.id === id);
+      if (!recipe) return;
+      const multiplier = state.servings / recipe.servings;
+      document.getElementById("recipe-sheet").innerHTML = `
+        <div class="sheet-photo">
+          ${imageTag(recipe.photo, recipe.title)}
+          <button class="close-sheet" type="button" onclick="closeRecipe()" aria-label="Fermer"><i data-lucide="x"></i></button>
+        </div>
+        <div class="sheet-content">
+          <div>
+            <h1 id="modal-title">${escapeHtml(recipe.title)}</h1>
+            <p>${modeLabel(state.mode)} - recette prevue pour ${state.servings} personne${state.servings > 1 ? "s" : ""}.</p>
+          </div>
+          <div class="info-grid">
+            <div class="info-box"><strong>${recipe.time} min</strong><span>Preparation</span></div>
+            <div class="info-box"><strong>${escapeHtml(recipe.difficulty)}</strong><span>Difficulte</span></div>
+            <div class="info-box"><strong>${state.servings}</strong><span>Personnes</span></div>
+            <div class="info-box"><strong>${recipe.nutrition.calories}</strong><span>kcal / pers.</span></div>
+          </div>
+          <section class="panel">
+            <div class="panel-header"><h2>Ingredients</h2></div>
+            <ul class="ingredient-list">
+              ${recipe.ingredients.map(item => `<li>${escapeHtml(getIngredient(item.id).name)} - ${formatQuantity(item.quantity * multiplier)} ${escapeHtml(item.unit)}</li>`).join("")}
+            </ul>
+          </section>
+          <section class="panel">
+            <div class="panel-header"><h2>Etapes</h2></div>
+            <ol class="step-list">
+              ${recipe.steps.map(step => `<li>${escapeHtml(step)}</li>`).join("")}
+            </ol>
+          </section>
+          <section class="panel">
+            <div class="panel-header"><h2>Nutrition</h2></div>
+            <div class="info-grid">
+              <div class="info-box"><strong>${recipe.nutrition.calories}</strong><span>Calories</span></div>
+              <div class="info-box"><strong>${recipe.nutrition.protein} g</strong><span>Proteines</span></div>
+              <div class="info-box"><strong>${recipe.nutrition.carbs} g</strong><span>Glucides</span></div>
+              <div class="info-box"><strong>${recipe.nutrition.fat} g</strong><span>Lipides</span></div>
+            </div>
+          </section>
+        </div>
+      `;
+      document.getElementById("recipe-modal").classList.add("open");
+      createIcons();
+    }
+
+    function closeRecipe() {
+      document.getElementById("recipe-modal").classList.remove("open");
+    }
+
+    function aggregateShopping() {
+      const map = new Map();
+      Object.values(state.plan).forEach(recipeId => {
+        const recipe = recipes.find(item => item.id === recipeId);
+        if (!recipe) return;
+        const multiplier = state.servings / recipe.servings;
+        recipe.ingredients.forEach(item => {
+          const meta = getIngredient(item.id);
+          const key = `${item.id}|${item.unit}`;
+          const current = map.get(key) || { id: item.id, name: meta.name, category: meta.category, unit: item.unit, quantity: 0, drive: meta.drive, color: meta.color };
+          current.quantity += Number(item.quantity || 0) * multiplier;
+          map.set(key, current);
+        });
+      });
+      return [...map.values()].sort((a, b) => categoryOrder.indexOf(a.category) - categoryOrder.indexOf(b.category) || a.name.localeCompare(b.name));
+    }
+
+    function shoppingText() {
+      const list = aggregateShopping();
+      if (!list.length) return "Liste de courses vide.";
+      const grouped = groupBy(list, item => item.category);
+      return categoryOrder.map(category => {
+        const items = grouped[category] || [];
+        if (!items.length) return "";
+        return `${categories[category]}\n${items.map(item => `- ${item.name}: ${formatQuantity(item.quantity)} ${item.unit}`).join("\n")}`;
+      }).filter(Boolean).join("\n\n");
+    }
+
+    function driveText() {
+      const list = aggregateShopping();
+      if (!list.length) return "Liste Drive vide.";
+      return list.map(item => `- ${item.drive || item.name} (${formatQuantity(item.quantity)} ${item.unit})`).join("\n");
+    }
+
+    async function copyShoppingList() {
+      await copyText(shoppingText(), "Liste de courses copiee.");
+    }
+
+    async function copyDriveList() {
+      await copyText(driveText(), "Liste Drive copiee. Tu peux l'utiliser sur Intermarche.");
+    }
+
+    async function copyWeek() {
+      const text = days.map(day => {
+        const lines = slots.map(([slot, label]) => {
+          const recipe = recipes.find(item => item.id === state.plan[mealKey(day, slot)]);
+          return `${label}: ${recipe ? recipe.title : "Libre"}`;
+        }).join("\n");
+        return `${day}\n${lines}`;
+      }).join("\n\n");
+      await copyText(text, "Semaine copiee.");
+    }
+
+    async function copyText(text, message) {
+      try {
+        await navigator.clipboard.writeText(text);
+        toast(message);
+      } catch {
+        toast("Copie impossible ici. Essaie le telechargement.");
+      }
+    }
+
+    function downloadShoppingList() {
+      const blob = new Blob([shoppingText()], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `courses-menu-de-maman-${new Date().toISOString().slice(0, 10)}.txt`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 600);
+      toast("Liste telechargee.");
+    }
+
+    function uncheckAll() {
+      state.checked = {};
+      saveState();
+      renderShoppingList();
+      renderStats();
+      toast("Courses decochees.");
+    }
+
+    function switchView(view, persist = true) {
+      state.view = view;
+      document.querySelectorAll(".section-view").forEach(section => section.classList.toggle("active", section.id === `view-${view}`));
+      document.querySelectorAll(".nav-button").forEach(button => button.classList.toggle("active", button.dataset.view === view));
+      if (persist) saveState();
+      createIcons();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function hasValidPlan() {
+      return Object.values(state.plan || {}).some(id => recipes.some(recipe => recipe.id === id));
+    }
+
+    function hasSameDayDuplicates() {
+      return days.some(day => {
+        const ids = slots.map(([slot]) => state.plan[mealKey(day, slot)]).filter(Boolean);
+        return new Set(ids).size !== ids.length;
+      });
+    }
+
+    function recipe(data) {
+      return data;
+    }
+
+    function ing(id, quantity, unit) {
+      return { id, quantity, unit };
+    }
+
+    function meta(name, category, drive, color) {
+      return { name, category, drive, color };
+    }
+
+    function getIngredient(id) {
+      return ingredientMeta[id] || meta(id, "epicerie", id, "#eadfce");
+    }
+
+    function ingredientImage(item) {
+      const label = getIngredient(item.id).name.split(" ").map(part => part[0]).join("").slice(0, 2).toUpperCase();
+      const color = item.color || getIngredient(item.id).color || "#eadfce";
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" rx="18" fill="${color}"/><circle cx="62" cy="18" r="12" fill="rgba(255,255,255,.38)"/><text x="40" y="48" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="800" fill="#3b3328">${label}</text></svg>`;
+      return `<img alt="${escapeAttribute(item.name)}" src="data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}">`;
+    }
+
+    function imageTag(src, alt) {
+      const fallback = encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="500" height="360" viewBox="0 0 500 360"><rect width="500" height="360" fill="#fff1df"/><circle cx="125" cy="130" r="74" fill="#f3c49a"/><circle cx="290" cy="190" r="112" fill="#dcebd8"/><text x="250" y="188" text-anchor="middle" font-family="Arial,sans-serif" font-size="32" font-weight="800" fill="#754229">Recette</text></svg>`);
+      return `<img src="${escapeAttribute(src)}" alt="${escapeAttribute(alt)}" loading="lazy" onerror="this.onerror=null;this.src='data:image/svg+xml;charset=UTF-8,${fallback}'">`;
+    }
+
+    function mealKey(day, slot) {
+      return `${day}-${slot}`;
+    }
+
+    function shoppingKey(item) {
+      return `${item.id}|${item.unit}`;
+    }
+
+    function modeLabel(id) {
+      return modes.find(mode => mode.id === id)?.label || "Equilibre";
+    }
+
+    function groupBy(items, fn) {
+      return items.reduce((acc, item) => {
+        const key = fn(item);
+        (acc[key] ||= []).push(item);
+        return acc;
+      }, {});
+    }
+
+    function randomItem(items) {
+      return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        return { ...defaultState, ...saved, checked: saved.checked || {}, plan: saved.plan || {} };
+      } catch {
+        return { ...defaultState };
+      }
+    }
+
+    function formatQuantity(value) {
+      const rounded = Math.round(Number(value || 0) * 10) / 10;
+      return Number.isInteger(rounded) ? String(rounded) : String(rounded).replace(".", ",");
+    }
+
+    function normalize(text) {
+      return String(text || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ").trim();
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[char]));
+    }
+
+    function escapeAttribute(text) {
+      return escapeHtml(text).replace(/`/g, "&#096;");
+    }
+
+    function toast(message) {
+      const element = document.getElementById("toast");
+      clearTimeout(toastTimer);
+      element.textContent = message;
+      element.classList.add("show");
+      toastTimer = setTimeout(() => element.classList.remove("show"), 2600);
+    }
+
+    function createIcons() {
+      if (window.lucide) lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

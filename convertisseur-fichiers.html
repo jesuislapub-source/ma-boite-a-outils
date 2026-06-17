@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Convertisseur de fichiers local</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <style>
+    :root {
+      --bg: #02050d;
+      --bg-soft: #07111f;
+      --panel: rgba(7, 17, 31, .84);
+      --line: rgba(105, 231, 255, .18);
+      --line-strong: rgba(105, 231, 255, .46);
+      --text: #effaff;
+      --muted: #93a9bd;
+      --cyan: #54e7ff;
+      --blue: #3978ff;
+      --violet: #a66cff;
+      --green: #69ffca;
+      --gold: #ffd86b;
+      --danger: #ff687d;
+      --radius: 8px;
+      --shadow: 0 24px 80px rgba(0, 0, 0, .42);
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        linear-gradient(90deg, rgba(84, 231, 255, .06) 1px, transparent 1px),
+        linear-gradient(rgba(84, 231, 255, .045) 1px, transparent 1px),
+        linear-gradient(145deg, #02050d 0%, #07111f 52%, #02040a 100%);
+      background-size: 44px 44px, 44px 44px, auto;
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { border: 0; color: inherit; cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .48; }
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 5px; font-size: clamp(30px, 4vw, 54px); line-height: 1; letter-spacing: 0; }
+    h2 { margin-bottom: 14px; font-size: 20px; letter-spacing: 0; }
+    h3 { margin-bottom: 8px; font-size: 15px; letter-spacing: 0; }
+    p { color: var(--muted); line-height: 1.55; }
+
+    input, textarea, select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--text);
+      background: rgba(4, 12, 24, .78);
+      outline: 0;
+      padding: 11px 12px;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    textarea {
+      min-height: 360px;
+      resize: vertical;
+      line-height: 1.5;
+      font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      font-size: 13px;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: rgba(84, 231, 255, .88);
+      box-shadow: 0 0 0 3px rgba(84, 231, 255, .14);
+      background: rgba(5, 17, 32, .96);
+    }
+
+    .shell {
+      width: min(1320px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 20px 0 34px;
+    }
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      padding-bottom: 16px;
+    }
+    .brand { display: flex; min-width: 0; align-items: center; gap: 14px; }
+    .mark {
+      width: 46px;
+      height: 46px;
+      flex: 0 0 46px;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      color: var(--cyan);
+      border: 1px solid rgba(84, 231, 255, .52);
+      background: linear-gradient(135deg, rgba(84, 231, 255, .18), rgba(255, 216, 107, .10)), rgba(4, 12, 24, .82);
+      box-shadow: 0 0 28px rgba(84, 231, 255, .18), inset 0 0 20px rgba(84, 231, 255, .08);
+    }
+    .eyebrow {
+      margin-bottom: 6px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+    .subtitle { margin-bottom: 0; max-width: 760px; }
+    .nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+    .primary, .secondary, .ghost, .danger, .icon-btn {
+      min-height: 42px;
+      border-radius: var(--radius);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 13px;
+      font-weight: 850;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .primary { color: #001019; background: linear-gradient(135deg, var(--cyan), var(--green)); box-shadow: 0 0 28px rgba(84, 231, 255, .22); }
+    .secondary { color: white; background: linear-gradient(135deg, rgba(57, 120, 255, .94), rgba(166, 108, 255, .90)); box-shadow: 0 0 28px rgba(166, 108, 255, .16); }
+    .ghost { color: var(--text); border: 1px solid var(--line); background: rgba(7, 17, 31, .72); }
+    .danger { color: white; border: 1px solid rgba(255, 104, 125, .50); background: rgba(255, 104, 125, .16); }
+    .icon-btn { width: 42px; padding: 0; color: var(--text); border: 1px solid var(--line); background: rgba(7, 17, 31, .72); }
+    .primary:hover, .secondary:hover, .ghost:hover, .danger:hover, .icon-btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      box-shadow: 0 0 28px rgba(84, 231, 255, .15);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(300px, 430px) minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow), inset 0 0 30px rgba(84, 231, 255, .03);
+      backdrop-filter: blur(18px);
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 15px 0;
+    }
+    .panel-body { padding: 15px; }
+    .stack { display: grid; gap: 14px; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+    .field { display: grid; gap: 6px; }
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .drop-zone {
+      min-height: 232px;
+      border: 1px dashed rgba(105, 231, 255, .46);
+      border-radius: var(--radius);
+      background: rgba(4, 12, 24, .56);
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      text-align: center;
+      transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .drop-zone.dragover {
+      border-color: var(--green);
+      background: rgba(105, 255, 202, .10);
+      box-shadow: 0 0 28px rgba(105, 255, 202, .12);
+    }
+    .drop-zone i { color: var(--cyan); width: 42px; height: 42px; margin-bottom: 10px; }
+    .file-card, .status, .format-grid > div {
+      border: 1px solid rgba(105, 231, 255, .15);
+      border-radius: var(--radius);
+      background: rgba(4, 12, 24, .56);
+      padding: 12px;
+    }
+    .file-card strong { display: block; margin-bottom: 4px; overflow-wrap: anywhere; }
+    .file-card span, .status, .format-grid span { color: var(--muted); font-size: 13px; }
+    .status { min-height: 48px; display: flex; align-items: center; font-weight: 760; }
+    .format-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .format-grid strong { display: block; color: var(--cyan); margin-bottom: 4px; }
+    .preview-frame {
+      min-height: 460px;
+      border: 1px solid rgba(105, 231, 255, .15);
+      border-radius: var(--radius);
+      background: rgba(4, 12, 24, .56);
+      padding: 12px;
+      overflow: auto;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+    .preview-frame img {
+      max-width: 100%;
+      max-height: 520px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(105, 231, 255, .16);
+      background: #fff;
+    }
+    .hidden-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill {
+      border: 1px solid rgba(105, 231, 255, .15);
+      border-radius: 999px;
+      padding: 7px 10px;
+      color: var(--muted);
+      background: rgba(4, 12, 24, .56);
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    @media (max-width: 980px) {
+      .topbar, .layout { grid-template-columns: 1fr; }
+      .nav { justify-content: flex-start; }
+    }
+    @media (max-width: 660px) {
+      .shell { width: min(100% - 22px, 1320px); padding-top: 14px; }
+      .brand { align-items: start; }
+      .mark { width: 40px; height: 40px; flex-basis: 40px; }
+      .nav > a, .button-row > button, .button-row > a { flex: 1 1 150px; }
+      .format-grid { grid-template-columns: 1fr; }
+      textarea { min-height: 300px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true"><i data-lucide="refresh-cw"></i></div>
+        <div>
+          <div class="eyebrow">Traitement local</div>
+          <h1>Convertisseur</h1>
+          <p class="subtitle">Images, textes, Markdown, CSV, JSON et PDF texte depuis le navigateur.</p>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navigation principale">
+        <a class="ghost" href="index.html"><i data-lucide="orbit"></i>Atlas</a>
+        <a class="ghost" href="atelier-etude.html"><i data-lucide="book-open-check"></i>Atelier</a>
+        <a class="ghost" href="cv-lettre.html"><i data-lucide="file-user"></i>CV</a>
+        <a class="ghost" href="recettes-planificateur.html"><i data-lucide="utensils"></i>Recettes</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <section class="panel">
+        <div class="panel-header"><h2>Fichier</h2></div>
+        <div class="panel-body stack">
+          <label class="drop-zone" id="drop-zone" for="file-input">
+            <span>
+              <i data-lucide="file-up"></i>
+              <strong>Glisser ou choisir un fichier</strong>
+              <p>Conversion locale, puis telechargement direct.</p>
+            </span>
+          </label>
+          <input class="hidden-input" id="file-input" type="file" accept="image/*,.txt,.md,.markdown,.csv,.json,.html,.pdf,text/*,application/json,application/pdf">
+          <div class="file-card" id="file-card">
+            <strong>Aucun fichier</strong>
+            <span>Formats detectes automatiquement.</span>
+          </div>
+          <div class="field">
+            <label for="target-format">Format cible</label>
+            <select id="target-format" disabled></select>
+          </div>
+          <div class="button-row">
+            <button class="primary" type="button" id="convert-btn" disabled><i data-lucide="wand-2"></i>Convertir</button>
+            <button class="ghost" type="button" id="reset-btn"><i data-lucide="rotate-ccw"></i>Reset</button>
+          </div>
+          <div class="status" id="status">Pret.</div>
+        </div>
+      </section>
+
+      <section class="stack">
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Apercu</h2>
+            <div class="pill-row" id="format-pills"></div>
+          </div>
+          <div class="panel-body">
+            <div class="preview-frame" id="preview">
+              <p>Aucun apercu.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header"><h2>Formats actifs</h2></div>
+          <div class="panel-body format-grid">
+            <div><strong>Images</strong><span>PNG, JPG, WEBP, PDF</span></div>
+            <div><strong>Texte</strong><span>TXT, MD, HTML, PDF</span></div>
+            <div><strong>Donnees</strong><span>CSV, JSON, TXT, PDF</span></div>
+            <div><strong>PDF</strong><span>TXT, MD, HTML par extraction texte</span></div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    const dropZone = document.getElementById("drop-zone");
+    const fileInput = document.getElementById("file-input");
+    const fileCard = document.getElementById("file-card");
+    const targetFormat = document.getElementById("target-format");
+    const convertBtn = document.getElementById("convert-btn");
+    const resetBtn = document.getElementById("reset-btn");
+    const statusEl = document.getElementById("status");
+    const preview = document.getElementById("preview");
+    const formatPills = document.getElementById("format-pills");
+    let currentFile = null;
+    let currentKind = null;
+
+    const optionMap = {
+      image: [
+        ["png", "PNG"],
+        ["jpg", "JPG"],
+        ["webp", "WEBP"],
+        ["pdf", "PDF"]
+      ],
+      pdf: [
+        ["txt", "TXT"],
+        ["md", "Markdown"],
+        ["html", "HTML"]
+      ],
+      csv: [
+        ["json", "JSON"],
+        ["csv", "CSV nettoye"],
+        ["txt", "TXT"],
+        ["html", "HTML"],
+        ["pdf", "PDF"]
+      ],
+      json: [
+        ["csv", "CSV"],
+        ["txt", "TXT"],
+        ["html", "HTML"],
+        ["pdf", "PDF"]
+      ],
+      markdown: [
+        ["html", "HTML"],
+        ["pdf", "PDF"],
+        ["txt", "TXT"],
+        ["md", "Markdown"]
+      ],
+      html: [
+        ["txt", "TXT"],
+        ["md", "Markdown"],
+        ["pdf", "PDF"]
+      ],
+      text: [
+        ["txt", "TXT"],
+        ["md", "Markdown"],
+        ["html", "HTML"],
+        ["pdf", "PDF"]
+      ]
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      if (window.pdfjsLib) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      }
+      bindEvents();
+      renderTargets([]);
+    });
+
+    function bindEvents() {
+      fileInput.addEventListener("change", event => handleFile(event.target.files[0]));
+      ["dragenter", "dragover"].forEach(name => {
+        dropZone.addEventListener(name, event => {
+          event.preventDefault();
+          dropZone.classList.add("dragover");
+        });
+      });
+      ["dragleave", "drop"].forEach(name => {
+        dropZone.addEventListener(name, event => {
+          event.preventDefault();
+          dropZone.classList.remove("dragover");
+        });
+      });
+      dropZone.addEventListener("drop", event => handleFile(event.dataTransfer.files[0]));
+      convertBtn.addEventListener("click", convertCurrentFile);
+      resetBtn.addEventListener("click", resetConverter);
+    }
+
+    async function handleFile(file) {
+      if (!file) return;
+      currentFile = file;
+      currentKind = detectKind(file);
+      fileCard.innerHTML = `<strong>${escapeHtml(file.name)}</strong><span>${formatBytes(file.size)} - ${escapeHtml(file.type || extension(file).toUpperCase() || "type inconnu")}</span>`;
+      renderTargets(optionMap[currentKind] || []);
+      convertBtn.disabled = !(optionMap[currentKind] || []).length;
+      setStatus(currentKind ? `Format detecte : ${currentKind}.` : "Format non reconnu.");
+      await renderPreview(file, currentKind);
+    }
+
+    function renderTargets(options) {
+      targetFormat.innerHTML = options.length
+        ? options.map(([value, label]) => `<option value="${value}">${label}</option>`).join("")
+        : `<option>Aucun format disponible</option>`;
+      targetFormat.disabled = !options.length;
+      formatPills.innerHTML = options.map(([value, label]) => `<span class="pill">${escapeHtml(label)}</span>`).join("");
+    }
+
+    async function renderPreview(file, kind) {
+      preview.innerHTML = `<p>Chargement...</p>`;
+      try {
+        if (kind === "image") {
+          const url = await readAsDataURL(file);
+          preview.innerHTML = `<img src="${url}" alt="Apercu du fichier image">`;
+          return;
+        }
+        const text = kind === "pdf" ? await extractPdfText(file, 8) : await readAsText(file);
+        preview.innerHTML = `<textarea readonly>${escapeHtml(text.slice(0, 16000))}</textarea>`;
+      } catch (error) {
+        preview.innerHTML = `<p>${escapeHtml(error.message || "Apercu indisponible.")}</p>`;
+      }
+    }
+
+    async function convertCurrentFile() {
+      if (!currentFile || !currentKind) return;
+      const target = targetFormat.value;
+      setStatus("Conversion en cours...");
+      try {
+        if (currentKind === "image") {
+          await convertImage(currentFile, target);
+        } else if (currentKind === "pdf") {
+          const text = await extractPdfText(currentFile);
+          await convertText(text, "pdf", target, baseName(currentFile));
+        } else {
+          const text = await readAsText(currentFile);
+          await convertText(text, currentKind, target, baseName(currentFile));
+        }
+        setStatus("Conversion terminee.");
+      } catch (error) {
+        setStatus(error.message || "Conversion impossible pour ce fichier.");
+      }
+    }
+
+    async function convertImage(file, target) {
+      const dataUrl = await readAsDataURL(file);
+      const image = await loadImage(dataUrl);
+      if (target === "pdf") {
+        const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+        const pdfCanvas = imageToCanvas(image, "#ffffff");
+        const pdfImage = pdfCanvas.toDataURL("image/jpeg", .92);
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+        const ratio = Math.min((pageW - 20) / pdfCanvas.width, (pageH - 20) / pdfCanvas.height);
+        const width = pdfCanvas.width * ratio;
+        const height = pdfCanvas.height * ratio;
+        doc.addImage(pdfImage, "JPEG", (pageW - width) / 2, (pageH - height) / 2, width, height);
+        doc.save(`${baseName(file)}.pdf`);
+        return;
+      }
+      const canvas = imageToCanvas(image, target === "jpg" ? "#ffffff" : null);
+      const mime = target === "jpg" ? "image/jpeg" : `image/${target}`;
+      const blob = await canvasToBlob(canvas, mime, .92);
+      if (!blob) throw new Error("Format image non supporte par ce navigateur.");
+      downloadBlob(blob, `${baseName(file)}.${target === "jpg" ? "jpg" : target}`);
+    }
+
+    async function convertText(text, sourceKind, target, name) {
+      if (sourceKind === "csv" && target === "json") {
+        const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+        downloadText(JSON.stringify(parsed.data, null, 2), `${name}.json`, "application/json");
+        return;
+      }
+      if (sourceKind === "json" && target === "csv") {
+        const data = JSON.parse(text);
+        const rows = Array.isArray(data) ? data : [data];
+        downloadText(Papa.unparse(rows), `${name}.csv`, "text/csv");
+        return;
+      }
+      if (sourceKind === "csv" && target === "csv") {
+        const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+        downloadText(Papa.unparse(parsed.data), `${name}.csv`, "text/csv");
+        return;
+      }
+      if (target === "pdf") {
+        textToPdf(normalizeTextSource(text, sourceKind), `${name}.pdf`);
+        return;
+      }
+      if (target === "html") {
+        const html = sourceKind === "markdown" || sourceKind === "md"
+          ? markdownToHtml(text)
+          : sourceKind === "csv"
+            ? csvToHtml(text)
+            : `<pre>${escapeHtml(normalizeTextSource(text, sourceKind))}</pre>`;
+        downloadText(fullHtmlDocument(html, name), `${name}.html`, "text/html");
+        return;
+      }
+      if (target === "md") {
+        const body = sourceKind === "html" ? htmlToMarkdown(text) : normalizeTextSource(text, sourceKind);
+        downloadText(body, `${name}.md`, "text/markdown");
+        return;
+      }
+      downloadText(normalizeTextSource(text, sourceKind), `${name}.${target}`, "text/plain");
+    }
+
+    function normalizeTextSource(text, sourceKind) {
+      if (sourceKind === "json") return JSON.stringify(JSON.parse(text), null, 2);
+      if (sourceKind === "csv") {
+        const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+        return parsed.data.map(row => Object.entries(row).map(([key, value]) => `${key}: ${value}`).join(" | ")).join("\n");
+      }
+      if (sourceKind === "html") return stripHtml(text);
+      return text;
+    }
+
+    async function extractPdfText(file, pageLimit = Infinity) {
+      if (!window.pdfjsLib) throw new Error("PDF.js indisponible.");
+      const buffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      const pages = Math.min(pdf.numPages, pageLimit);
+      const chunks = [];
+      for (let pageNum = 1; pageNum <= pages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const content = await page.getTextContent();
+        chunks.push(content.items.map(item => item.str).join(" "));
+      }
+      if (pageLimit !== Infinity && pdf.numPages > pageLimit) chunks.push(`\n... ${pdf.numPages - pageLimit} page(s) non affichee(s) dans l'apercu.`);
+      return chunks.join("\n\n").trim();
+    }
+
+    function textToPdf(text, fileName) {
+      const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+      const margin = 16;
+      const width = doc.internal.pageSize.getWidth() - margin * 2;
+      const lines = doc.splitTextToSize(String(text || ""), width);
+      let y = 18;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      lines.forEach(line => {
+        if (y > 282) {
+          doc.addPage();
+          y = 18;
+        }
+        doc.text(line, margin, y);
+        y += 5;
+      });
+      doc.save(fileName);
+    }
+
+    function csvToHtml(text) {
+      const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+      const headers = parsed.meta.fields || [];
+      if (!headers.length) return `<pre>${escapeHtml(text)}</pre>`;
+      return `<table><thead><tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join("")}</tr></thead><tbody>${parsed.data.map(row => `<tr>${headers.map(h => `<td>${escapeHtml(row[h] ?? "")}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+    }
+
+    function markdownToHtml(markdown) {
+      const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+      const out = [];
+      let inList = false;
+      lines.forEach(raw => {
+        const line = raw.trim();
+        if (!line) {
+          if (inList) { out.push("</ul>"); inList = false; }
+          return;
+        }
+        const heading = line.match(/^(#{1,3})\s+(.*)$/);
+        if (heading) {
+          if (inList) { out.push("</ul>"); inList = false; }
+          out.push(`<h${heading[1].length}>${inlineMarkdown(heading[2])}</h${heading[1].length}>`);
+          return;
+        }
+        const bullet = line.match(/^[-*]\s+(.*)$/);
+        if (bullet) {
+          if (!inList) { out.push("<ul>"); inList = true; }
+          out.push(`<li>${inlineMarkdown(bullet[1])}</li>`);
+          return;
+        }
+        if (inList) { out.push("</ul>"); inList = false; }
+        out.push(`<p>${inlineMarkdown(line)}</p>`);
+      });
+      if (inList) out.push("</ul>");
+      return out.join("\n");
+    }
+
+    function inlineMarkdown(text) {
+      return escapeHtml(text).replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>");
+    }
+
+    function htmlToMarkdown(html) {
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      return doc.body.innerText.trim();
+    }
+
+    function stripHtml(html) {
+      return new DOMParser().parseFromString(html, "text/html").body.innerText.trim();
+    }
+
+    function fullHtmlDocument(body, title) {
+      return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtml(title)}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 32px; color: #172126; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #d8e0e8; padding: 8px; text-align: left; vertical-align: top; }
+    th { background: #eef6fb; }
+    pre { white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+${body}
+</body>
+</html>`;
+    }
+
+    function detectKind(file) {
+      const ext = extension(file);
+      if (file.type.startsWith("image/")) return "image";
+      if (file.type === "application/pdf" || ext === "pdf") return "pdf";
+      if (ext === "csv") return "csv";
+      if (ext === "json" || file.type === "application/json") return "json";
+      if (ext === "md" || ext === "markdown") return "markdown";
+      if (ext === "html" || ext === "htm") return "html";
+      if (file.type.startsWith("text/") || ["txt", "log"].includes(ext)) return "text";
+      return null;
+    }
+
+    function resetConverter() {
+      currentFile = null;
+      currentKind = null;
+      fileInput.value = "";
+      fileCard.innerHTML = `<strong>Aucun fichier</strong><span>Formats detectes automatiquement.</span>`;
+      preview.innerHTML = "<p>Aucun apercu.</p>";
+      renderTargets([]);
+      convertBtn.disabled = true;
+      setStatus("Pret.");
+    }
+
+    function readAsText(file) {
+      return file.text();
+    }
+
+    function readAsDataURL(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error("Image illisible."));
+        img.src = src;
+      });
+    }
+
+    function canvasToBlob(canvas, type, quality) {
+      return new Promise(resolve => canvas.toBlob(resolve, type, quality));
+    }
+
+    function imageToCanvas(image, fill) {
+      const canvas = document.createElement("canvas");
+      canvas.width = image.naturalWidth || image.width;
+      canvas.height = image.naturalHeight || image.height;
+      const ctx = canvas.getContext("2d");
+      if (fill) {
+        ctx.fillStyle = fill;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      ctx.drawImage(image, 0, 0);
+      return canvas;
+    }
+
+    function downloadText(text, fileName, type) {
+      downloadBlob(new Blob([text], { type }), fileName);
+    }
+
+    function downloadBlob(blob, fileName) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function baseName(file) {
+      return file.name.replace(/\.[^.]+$/, "").replace(/[^a-z0-9_-]+/gi, "-").replace(/^-|-$/g, "") || "fichier";
+    }
+
+    function extension(file) {
+      return (file.name.split(".").pop() || "").toLowerCase();
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes) return "0 o";
+      const units = ["o", "Ko", "Mo", "Go"];
+      const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+      return `${(bytes / Math.pow(1024, index)).toFixed(index ? 1 : 0)} ${units[index]}`;
+    }
+
+    function setStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[char]));
+    }
+  </script>
+</body>
+</html>

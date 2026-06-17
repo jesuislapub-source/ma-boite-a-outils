@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generateur de CV et lettre</title>
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <style>
+    :root {
+      --bg: #02050d;
+      --bg-soft: #07111f;
+      --panel: rgba(7, 17, 31, .84);
+      --panel-strong: rgba(10, 25, 45, .96);
+      --line: rgba(105, 231, 255, .18);
+      --line-strong: rgba(105, 231, 255, .46);
+      --text: #effaff;
+      --muted: #93a9bd;
+      --cyan: #54e7ff;
+      --blue: #3978ff;
+      --violet: #a66cff;
+      --green: #69ffca;
+      --gold: #ffd86b;
+      --danger: #ff687d;
+      --radius: 8px;
+      --shadow: 0 24px 80px rgba(0, 0, 0, .42);
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        linear-gradient(90deg, rgba(84, 231, 255, .06) 1px, transparent 1px),
+        linear-gradient(rgba(84, 231, 255, .045) 1px, transparent 1px),
+        linear-gradient(145deg, #02050d 0%, #07111f 52%, #02040a 100%);
+      background-size: 44px 44px, 44px 44px, auto;
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { border: 0; color: inherit; cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 5px; font-size: clamp(30px, 4vw, 54px); line-height: 1; letter-spacing: 0; }
+    h2 { margin-bottom: 14px; font-size: 20px; letter-spacing: 0; }
+    h3 { margin-bottom: 8px; font-size: 15px; letter-spacing: 0; }
+    p { color: var(--muted); line-height: 1.55; }
+
+    input, textarea, select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      color: var(--text);
+      background: rgba(4, 12, 24, .78);
+      outline: 0;
+      padding: 11px 12px;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    textarea { min-height: 118px; resize: vertical; line-height: 1.5; }
+    input:focus, textarea:focus, select:focus {
+      border-color: rgba(84, 231, 255, .88);
+      box-shadow: 0 0 0 3px rgba(84, 231, 255, .14);
+      background: rgba(5, 17, 32, .96);
+    }
+
+    .shell {
+      width: min(1320px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 20px 0 34px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+      padding-bottom: 16px;
+    }
+    .brand { display: flex; min-width: 0; align-items: center; gap: 14px; }
+    .mark {
+      width: 46px;
+      height: 46px;
+      flex: 0 0 46px;
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      color: var(--cyan);
+      border: 1px solid rgba(84, 231, 255, .52);
+      background: linear-gradient(135deg, rgba(84, 231, 255, .18), rgba(105, 255, 202, .10)), rgba(4, 12, 24, .82);
+      box-shadow: 0 0 28px rgba(84, 231, 255, .18), inset 0 0 20px rgba(84, 231, 255, .08);
+    }
+    .eyebrow {
+      margin-bottom: 6px;
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+    .subtitle { margin-bottom: 0; max-width: 760px; }
+    .nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+    .primary, .secondary, .ghost, .danger, .icon-btn {
+      min-height: 42px;
+      border-radius: var(--radius);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 13px;
+      font-weight: 850;
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+    .primary { color: #001019; background: linear-gradient(135deg, var(--cyan), var(--green)); box-shadow: 0 0 28px rgba(84, 231, 255, .22); }
+    .secondary { color: white; background: linear-gradient(135deg, rgba(57, 120, 255, .94), rgba(166, 108, 255, .90)); box-shadow: 0 0 28px rgba(166, 108, 255, .16); }
+    .ghost { color: var(--text); border: 1px solid var(--line); background: rgba(7, 17, 31, .72); }
+    .danger { color: white; border: 1px solid rgba(255, 104, 125, .50); background: rgba(255, 104, 125, .16); }
+    .icon-btn { width: 42px; padding: 0; color: var(--text); border: 1px solid var(--line); background: rgba(7, 17, 31, .72); }
+    .primary:hover, .secondary:hover, .ghost:hover, .danger:hover, .icon-btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      box-shadow: 0 0 28px rgba(84, 231, 255, .15);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+      gap: 14px;
+      align-items: start;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow), inset 0 0 30px rgba(84, 231, 255, .03);
+      backdrop-filter: blur(18px);
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 15px 0;
+    }
+    .panel-body { padding: 15px; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .field { display: grid; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .button-row { display: flex; flex-wrap: wrap; gap: 9px; align-items: center; }
+    .stack { display: grid; gap: 12px; }
+    .repeater { display: grid; gap: 10px; }
+    .repeater-item {
+      border: 1px solid rgba(105, 231, 255, .15);
+      border-radius: var(--radius);
+      padding: 12px;
+      background: rgba(4, 12, 24, .56);
+    }
+    .repeater-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .repeater-head strong { font-size: 14px; }
+    .aside { display: grid; gap: 14px; position: sticky; top: 14px; }
+    .stat-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .stat {
+      min-height: 82px;
+      border: 1px solid rgba(105, 231, 255, .15);
+      border-radius: var(--radius);
+      padding: 12px;
+      background: rgba(4, 12, 24, .56);
+      display: grid;
+      align-content: center;
+    }
+    .stat strong { display: block; color: var(--cyan); font-size: 25px; font-variant-numeric: tabular-nums; }
+    .stat span { color: var(--muted); font-size: 12px; font-weight: 800; }
+    .preview {
+      min-height: 480px;
+      border: 1px solid rgba(105, 231, 255, .15);
+      border-radius: var(--radius);
+      background: #f9fbff;
+      color: #1c2630;
+      padding: 24px;
+      overflow: auto;
+    }
+    .preview h3 { color: #0c5466; font-size: 24px; margin-bottom: 2px; }
+    .preview h4 { color: #0c5466; margin: 18px 0 6px; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; }
+    .preview p, .preview li { color: #2e3a44; line-height: 1.45; }
+    .preview ul { margin: 7px 0 0; padding-left: 18px; }
+    .hint { margin-bottom: 0; font-size: 13px; }
+    .status {
+      min-height: 44px;
+      border: 1px solid rgba(105, 231, 255, .15);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      color: var(--muted);
+      background: rgba(4, 12, 24, .56);
+      font-weight: 750;
+    }
+
+    @media (max-width: 980px) {
+      .topbar, .layout { grid-template-columns: 1fr; }
+      .nav { justify-content: flex-start; }
+      .aside { position: static; }
+    }
+    @media (max-width: 660px) {
+      .shell { width: min(100% - 22px, 1320px); padding-top: 14px; }
+      .brand { align-items: start; }
+      .mark { width: 40px; height: 40px; flex-basis: 40px; }
+      .form-grid, .stat-grid { grid-template-columns: 1fr; }
+      .nav > a, .button-row > button, .button-row > a { flex: 1 1 150px; }
+      .preview { min-height: 360px; padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="mark" aria-hidden="true"><i data-lucide="file-user"></i></div>
+        <div>
+          <div class="eyebrow">Documents personnels</div>
+          <h1>CV & lettre</h1>
+          <p class="subtitle">Un formulaire propre pour sortir un CV et une lettre de motivation en PDF.</p>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Navigation principale">
+        <a class="ghost" href="index.html"><i data-lucide="orbit"></i>Atlas</a>
+        <a class="ghost" href="atelier-etude.html"><i data-lucide="book-open-check"></i>Atelier</a>
+        <a class="ghost" href="convertisseur-fichiers.html"><i data-lucide="refresh-cw"></i>Convertisseur</a>
+        <a class="ghost" href="recettes-planificateur.html"><i data-lucide="utensils"></i>Recettes</a>
+      </nav>
+    </header>
+
+    <main class="layout">
+      <form class="stack" id="profile-form">
+        <section class="panel">
+          <div class="panel-header"><h2>Profil</h2></div>
+          <div class="panel-body form-grid">
+            <div class="field">
+              <label for="fullName">Nom complet</label>
+              <input id="fullName" name="fullName" placeholder="Camille Martin" autocomplete="name">
+            </div>
+            <div class="field">
+              <label for="headline">Titre</label>
+              <input id="headline" name="headline" placeholder="Developpeur web junior">
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" placeholder="camille@email.com" autocomplete="email">
+            </div>
+            <div class="field">
+              <label for="phone">Telephone</label>
+              <input id="phone" name="phone" placeholder="06 00 00 00 00" autocomplete="tel">
+            </div>
+            <div class="field">
+              <label for="city">Ville</label>
+              <input id="city" name="city" placeholder="Paris">
+            </div>
+            <div class="field">
+              <label for="website">Lien</label>
+              <input id="website" name="website" placeholder="portfolio.fr ou LinkedIn">
+            </div>
+            <div class="field full">
+              <label for="summary">Resume professionnel</label>
+              <textarea id="summary" name="summary" placeholder="Quelques lignes sur ton profil, ton objectif et ta valeur."></textarea>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Experiences</h2>
+            <button class="ghost" type="button" data-add="experiences"><i data-lucide="plus"></i>Ajouter</button>
+          </div>
+          <div class="panel-body repeater" id="experiences"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Formation</h2>
+            <button class="ghost" type="button" data-add="education"><i data-lucide="plus"></i>Ajouter</button>
+          </div>
+          <div class="panel-body repeater" id="education"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Competences</h2>
+            <button class="ghost" type="button" data-add="skills"><i data-lucide="plus"></i>Ajouter</button>
+          </div>
+          <div class="panel-body repeater" id="skills"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Langues</h2>
+            <button class="ghost" type="button" data-add="languages"><i data-lucide="plus"></i>Ajouter</button>
+          </div>
+          <div class="panel-body repeater" id="languages"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header"><h2>Lettre de motivation</h2></div>
+          <div class="panel-body form-grid">
+            <div class="field">
+              <label for="company">Entreprise</label>
+              <input id="company" name="company" placeholder="Nom de l'entreprise">
+            </div>
+            <div class="field">
+              <label for="jobTitle">Poste vise</label>
+              <input id="jobTitle" name="jobTitle" placeholder="Intitule du poste">
+            </div>
+            <div class="field">
+              <label for="contactName">Destinataire</label>
+              <input id="contactName" name="contactName" placeholder="Madame, Monsieur">
+            </div>
+            <div class="field">
+              <label for="availability">Disponibilite</label>
+              <input id="availability" name="availability" placeholder="Disponible immediatement">
+            </div>
+            <div class="field full">
+              <label for="motivation">Motivation</label>
+              <textarea id="motivation" name="motivation" placeholder="Pourquoi cette entreprise, ce poste, ce secteur."></textarea>
+            </div>
+            <div class="field full">
+              <label for="strengths">Arguments forts</label>
+              <textarea id="strengths" name="strengths" placeholder="Experiences, qualites, resultats, competences utiles."></textarea>
+            </div>
+          </div>
+        </section>
+      </form>
+
+      <aside class="aside">
+        <section class="panel">
+          <div class="panel-header"><h2>Telechargements</h2></div>
+          <div class="panel-body stack">
+            <div class="button-row">
+              <button class="primary" type="button" id="download-cv"><i data-lucide="download"></i>CV PDF</button>
+              <button class="secondary" type="button" id="download-letter"><i data-lucide="mail"></i>Lettre PDF</button>
+              <button class="ghost" type="button" id="download-both"><i data-lucide="files"></i>Les deux</button>
+            </div>
+            <div class="button-row">
+              <button class="ghost" type="button" id="save-draft"><i data-lucide="save"></i>Sauver brouillon</button>
+              <button class="danger" type="button" id="clear-draft"><i data-lucide="trash-2"></i>Vider</button>
+            </div>
+            <div class="status" id="status">Brouillon local pret.</div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header"><h2>Apercu</h2></div>
+          <div class="panel-body">
+            <div class="preview" id="preview"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header"><h2>Stats</h2></div>
+          <div class="panel-body stat-grid">
+            <div class="stat"><strong id="stat-exp">0</strong><span>Experiences</span></div>
+            <div class="stat"><strong id="stat-skills">0</strong><span>Competences</span></div>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script>
+    const STORAGE_KEY = "cv-lettre-generator-v1";
+    const repeaterConfigs = {
+      experiences: [
+        ["role", "Poste", "Stage developpeur web"],
+        ["company", "Entreprise", "Studio Nova"],
+        ["period", "Periode", "2025 - 2026"],
+        ["details", "Details", "Missions, resultats, outils utilises", "textarea"]
+      ],
+      education: [
+        ["degree", "Diplome", "BTS SIO"],
+        ["school", "Ecole", "Lycee / ecole"],
+        ["period", "Periode", "2024 - 2026"],
+        ["details", "Details", "Projets, options, mentions", "textarea"]
+      ],
+      skills: [
+        ["name", "Competence", "JavaScript"],
+        ["level", "Niveau", "Intermediaire"]
+      ],
+      languages: [
+        ["name", "Langue", "Francais"],
+        ["level", "Niveau", "Natif"]
+      ]
+    };
+
+    const form = document.getElementById("profile-form");
+    const statusEl = document.getElementById("status");
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      loadDraft();
+      ensureDefaults();
+      bindEvents();
+      renderPreview();
+    });
+
+    function bindEvents() {
+      document.querySelectorAll("[data-add]").forEach(button => {
+        button.addEventListener("click", () => {
+          addRepeaterItem(button.dataset.add);
+          renderPreview();
+        });
+      });
+      form.addEventListener("input", () => {
+        persist(false);
+        renderPreview();
+      });
+      document.getElementById("download-cv").addEventListener("click", generateCvPdf);
+      document.getElementById("download-letter").addEventListener("click", generateLetterPdf);
+      document.getElementById("download-both").addEventListener("click", () => {
+        generateCvPdf();
+        setTimeout(generateLetterPdf, 220);
+      });
+      document.getElementById("save-draft").addEventListener("click", () => persist(true));
+      document.getElementById("clear-draft").addEventListener("click", clearDraft);
+    }
+
+    function ensureDefaults() {
+      Object.keys(repeaterConfigs).forEach(kind => {
+        if (!document.getElementById(kind).children.length) addRepeaterItem(kind);
+      });
+    }
+
+    function addRepeaterItem(kind, values = {}) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "repeater-item";
+      wrapper.dataset.kind = kind;
+      const count = document.querySelectorAll(`#${kind} .repeater-item`).length + 1;
+      wrapper.innerHTML = `
+        <div class="repeater-head">
+          <strong>${sectionLabel(kind)} ${count}</strong>
+          <button class="icon-btn" type="button" title="Supprimer" aria-label="Supprimer"><i data-lucide="x"></i></button>
+        </div>
+        <div class="form-grid">
+          ${repeaterConfigs[kind].map(([name, label, placeholder, type]) => `
+            <div class="field ${type === "textarea" ? "full" : ""}">
+              <label>${label}</label>
+              ${type === "textarea"
+                ? `<textarea data-field="${name}" placeholder="${escapeAttribute(placeholder)}">${escapeHtml(values[name] || "")}</textarea>`
+                : `<input data-field="${name}" placeholder="${escapeAttribute(placeholder)}" value="${escapeAttribute(values[name] || "")}">`}
+            </div>
+          `).join("")}
+        </div>
+      `;
+      wrapper.querySelector("button").addEventListener("click", () => {
+        wrapper.remove();
+        persist(false);
+        renderPreview();
+      });
+      document.getElementById(kind).appendChild(wrapper);
+      lucide.createIcons();
+    }
+
+    function sectionLabel(kind) {
+      return ({ experiences: "Experience", education: "Formation", skills: "Competence", languages: "Langue" })[kind] || "Element";
+    }
+
+    function collectData() {
+      const data = Object.fromEntries(new FormData(form).entries());
+      Object.keys(repeaterConfigs).forEach(kind => {
+        data[kind] = [...document.querySelectorAll(`#${kind} .repeater-item`)].map(item => {
+          const row = {};
+          item.querySelectorAll("[data-field]").forEach(field => row[field.dataset.field] = field.value.trim());
+          return row;
+        }).filter(row => Object.values(row).some(Boolean));
+      });
+      return data;
+    }
+
+    function fillData(data) {
+      ["fullName", "headline", "email", "phone", "city", "website", "summary", "company", "jobTitle", "contactName", "availability", "motivation", "strengths"].forEach(id => {
+        document.getElementById(id).value = data[id] || "";
+      });
+      Object.keys(repeaterConfigs).forEach(kind => {
+        document.getElementById(kind).innerHTML = "";
+        (data[kind] || []).forEach(item => addRepeaterItem(kind, item));
+      });
+    }
+
+    function persist(showMessage) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(collectData()));
+      if (showMessage) setStatus("Brouillon sauvegarde dans ce navigateur.");
+    }
+
+    function loadDraft() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        fillData(saved);
+      } catch {
+        setStatus("Brouillon indisponible.");
+      }
+    }
+
+    function clearDraft() {
+      if (!confirm("Vider le formulaire et le brouillon local ?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      form.reset();
+      Object.keys(repeaterConfigs).forEach(kind => document.getElementById(kind).innerHTML = "");
+      ensureDefaults();
+      renderPreview();
+      setStatus("Formulaire vide.");
+    }
+
+    function renderPreview() {
+      const data = collectData();
+      document.getElementById("stat-exp").textContent = data.experiences.length;
+      document.getElementById("stat-skills").textContent = data.skills.length;
+      document.getElementById("preview").innerHTML = `
+        <h3>${escapeHtml(data.fullName || "Ton nom")}</h3>
+        <p><strong>${escapeHtml(data.headline || "Titre professionnel")}</strong></p>
+        <p>${[data.email, data.phone, data.city, data.website].filter(Boolean).map(escapeHtml).join(" | ") || "Coordonnees"}</p>
+        <h4>Profil</h4>
+        <p>${escapeHtml(data.summary || "Resume professionnel en quelques lignes.")}</p>
+        <h4>Experiences</h4>
+        ${listPreview(data.experiences, item => `<strong>${escapeHtml(item.role || "Poste")}</strong> - ${escapeHtml(item.company || "Entreprise")}<br>${escapeHtml(item.period || "")}<br>${escapeHtml(item.details || "")}`)}
+        <h4>Competences</h4>
+        ${listPreview(data.skills, item => `${escapeHtml(item.name || "Competence")} ${item.level ? "- " + escapeHtml(item.level) : ""}`)}
+      `;
+    }
+
+    function listPreview(items, render) {
+      if (!items.length) return "<p>Aucun element.</p>";
+      return `<ul>${items.map(item => `<li>${render(item)}</li>`).join("")}</ul>`;
+    }
+
+    function generateCvPdf() {
+      const data = collectData();
+      const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+      const name = data.fullName || "Candidat";
+      doc.setFillColor(8, 28, 46);
+      doc.rect(0, 0, 62, 297, "F");
+      doc.setFillColor(84, 231, 255);
+      doc.rect(0, 0, 62, 6, "F");
+
+      doc.setTextColor(255, 255, 255);
+      doc.setFont("helvetica", "bold");
+      writeWrapped(doc, name, 10, 22, 44, 8, 17);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(191, 222, 235);
+      writeWrapped(doc, data.headline || "Titre professionnel", 10, 38, 44, 5, 10);
+
+      let leftY = 58;
+      leftY = sidebarSection(doc, "Contact", [data.email, data.phone, data.city, data.website].filter(Boolean), leftY);
+      leftY = sidebarSection(doc, "Competences", data.skills.map(item => `${item.name}${item.level ? " - " + item.level : ""}`), leftY);
+      leftY = sidebarSection(doc, "Langues", data.languages.map(item => `${item.name}${item.level ? " - " + item.level : ""}`), leftY);
+
+      let y = 22;
+      doc.setTextColor(18, 37, 49);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text(data.headline || "Profil professionnel", 72, y);
+      y += 10;
+      y = mainSection(doc, "Profil", [data.summary || "Resume professionnel a completer."], y);
+      y = mainSection(doc, "Experiences", data.experiences.map(exp => `${exp.role || "Poste"} - ${exp.company || "Entreprise"}\n${exp.period || ""}\n${exp.details || ""}`), y);
+      y = mainSection(doc, "Formation", data.education.map(item => `${item.degree || "Formation"} - ${item.school || "Etablissement"}\n${item.period || ""}\n${item.details || ""}`), y);
+
+      doc.save(`${slug(name)}-cv.pdf`);
+      setStatus("CV PDF telecharge.");
+    }
+
+    function generateLetterPdf() {
+      const data = collectData();
+      const doc = new window.jspdf.jsPDF({ unit: "mm", format: "a4" });
+      const margin = 22;
+      let y = 24;
+      doc.setTextColor(18, 37, 49);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text(data.fullName || "Nom complet", margin, y);
+      y += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      [data.email, data.phone, data.city, data.website].filter(Boolean).forEach(line => {
+        doc.text(line, margin, y);
+        y += 5;
+      });
+
+      y += 10;
+      const today = new Date().toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+      doc.text(`${data.city || "Ville"}, le ${today}`, 124, y);
+      y += 17;
+      doc.setFont("helvetica", "bold");
+      doc.text(data.company || "Entreprise", margin, y);
+      y += 8;
+      doc.text(`Objet : Candidature au poste de ${data.jobTitle || "poste vise"}`, margin, y);
+      y += 13;
+
+      doc.setFont("helvetica", "normal");
+      const intro = `${data.contactName || "Madame, Monsieur"},`;
+      y = paragraph(doc, intro, margin, y, 166);
+      y = paragraph(doc, data.motivation || `Je vous adresse ma candidature pour le poste de ${data.jobTitle || "poste vise"}. Votre entreprise m'interesse pour son environnement et les missions proposees.`, margin, y + 3, 166);
+      y = paragraph(doc, data.strengths || `Mon parcours m'a permis de developper des competences utiles pour ce poste, avec une approche serieuse, curieuse et orientee resultats.`, margin, y + 3, 166);
+      y = paragraph(doc, `${data.availability || "Je suis disponible pour un entretien a votre convenance"}. Je serais ravi d'echanger avec vous afin de vous presenter plus concretement ma motivation.`, margin, y + 3, 166);
+      y = paragraph(doc, "Je vous prie d'agreer l'expression de mes salutations distinguees.", margin, y + 8, 166);
+      doc.setFont("helvetica", "bold");
+      doc.text(data.fullName || "Nom complet", margin, y + 12);
+
+      doc.save(`${slug(data.fullName || "candidat")}-lettre-motivation.pdf`);
+      setStatus("Lettre PDF telechargee.");
+    }
+
+    function mainSection(doc, title, blocks, y) {
+      if (!blocks.length) blocks = ["A completer."];
+      y = pageCheck(doc, y, 24);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.setTextColor(11, 93, 112);
+      doc.text(title.toUpperCase(), 72, y);
+      y += 7;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(32, 48, 58);
+      blocks.forEach(block => {
+        y = pageCheck(doc, y, 34);
+        y = writeWrapped(doc, block, 72, y, 116, 5, 10) + 4;
+      });
+      return y + 2;
+    }
+
+    function sidebarSection(doc, title, lines, y) {
+      if (!lines.length) return y;
+      doc.setTextColor(84, 231, 255);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(10);
+      doc.text(title.toUpperCase(), 10, y);
+      y += 7;
+      doc.setTextColor(235, 248, 255);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      lines.forEach(line => {
+        y = writeWrapped(doc, line, 10, y, 44, 4.5, 9) + 3;
+      });
+      return y + 8;
+    }
+
+    function paragraph(doc, text, x, y, width) {
+      doc.setFontSize(11);
+      doc.setTextColor(25, 38, 48);
+      return writeWrapped(doc, text, x, y, width, 6, 11) + 5;
+    }
+
+    function writeWrapped(doc, text, x, y, width, lineHeight, size) {
+      doc.setFontSize(size);
+      const lines = doc.splitTextToSize(String(text || ""), width);
+      lines.forEach(line => {
+        y = pageCheck(doc, y, lineHeight + 8);
+        doc.text(line, x, y);
+        y += lineHeight;
+      });
+      return y;
+    }
+
+    function pageCheck(doc, y, needed) {
+      if (y + needed < 286) return y;
+      doc.addPage();
+      return 22;
+    }
+
+    function setStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    function slug(text) {
+      return String(text || "document").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "document";
+    }
+
+    function escapeHtml(text) {
+      return String(text ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;" }[char]));
+    }
+
+    function escapeAttribute(text) {
+      return escapeHtml(text).replace(/`/g, "&#096;");
+    }
+  </script>
+</body>
+</html>
